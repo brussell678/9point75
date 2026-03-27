@@ -226,7 +226,7 @@ select {
 }
 
 .hero__grid {
-  grid-template-columns: 1.8fr 1fr;
+  grid-template-columns: 2.15fr 0.95fr;
   align-items: start;
 }
 
@@ -257,7 +257,7 @@ select {
 }
 
 .hero h1 {
-  max-width: 9ch;
+  max-width: 10.5ch;
 }
 
 .hero__description,
