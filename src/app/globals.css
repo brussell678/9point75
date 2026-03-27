@@ -219,7 +219,8 @@ select {
 
 .hero__grid,
 .split-layout,
-.admin-route {
+.admin-route,
+.process-section {
   display: grid;
   gap: 1.5rem;
 }
@@ -227,6 +228,11 @@ select {
 .hero__grid {
   grid-template-columns: 1.8fr 1fr;
   align-items: end;
+}
+
+.hero__side {
+  display: grid;
+  gap: 1rem;
 }
 
 .hero__eyebrow,
@@ -283,6 +289,30 @@ select {
 .quote-form {
   border-radius: 1.75rem;
   padding: 1.5rem;
+}
+
+.feature-image-card {
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 250, 243, 0.78);
+  box-shadow: var(--shadow);
+}
+
+.feature-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.feature-image-card--hero .feature-image {
+  aspect-ratio: 4 / 3;
+}
+
+.feature-image-card--process .feature-image,
+.feature-image-card--materials .feature-image {
+  aspect-ratio: 16 / 10;
 }
 
 .hero__aside {
@@ -825,6 +855,12 @@ select {
   align-items: start;
 }
 
+.process-section {
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  margin-bottom: 1.75rem;
+}
+
 .footer-brand {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -851,6 +887,7 @@ select {
   .split-layout,
   .split-layout--wide,
   .admin-route,
+  .process-section,
   .cards-grid,
   .site-footer__grid,
   .gallery-grid,
@@ -939,6 +976,10 @@ select {
   .quote-form,
   .sign-in-card {
     padding: 1.2rem;
+    border-radius: 1.35rem;
+  }
+
+  .feature-image-card {
     border-radius: 1.35rem;
   }
 

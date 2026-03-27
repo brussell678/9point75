@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { AdminPreview } from "@/components/admin-preview";
 import { SectionHeading } from "@/components/section-heading";
@@ -30,12 +31,25 @@ export default async function Home() {
             </div>
           </div>
 
-          <aside className="hero__aside">
-            <p className="hero__aside-label">Service region</p>
-            <p>Jacksonville, North Carolina and surrounding coastal communities.</p>
-            <p className="hero__aside-label">Project focus</p>
-            <p>Built-ins, custom furniture, shadowboxes, plaques, and premium one-off pieces.</p>
-          </aside>
+          <div className="hero__side">
+            <div className="feature-image-card feature-image-card--hero">
+              <Image
+                src="/home/975-image-1.jpg"
+                alt="Featured custom woodworking project by 9point75 Woodworks"
+                width={1400}
+                height={1200}
+                className="feature-image"
+                priority
+              />
+            </div>
+
+            <aside className="hero__aside">
+              <p className="hero__aside-label">Service region</p>
+              <p>Jacksonville, North Carolina and surrounding coastal communities.</p>
+              <p className="hero__aside-label">Project focus</p>
+              <p>Built-ins, custom furniture, shadowboxes, plaques, and premium one-off pieces.</p>
+            </aside>
+          </div>
         </div>
       </section>
 
@@ -57,11 +71,24 @@ export default async function Home() {
       </section>
 
       <section className="section section--contrast">
+        <div className="shell process-section">
+          <div>
+            <SectionHeading
+              eyebrow="How it works"
+              title="A straightforward path from first conversation to final delivery."
+            />
+          </div>
+          <div className="feature-image-card feature-image-card--process">
+            <Image
+              src="/home/975-image-3.jpg"
+              alt="Woodworking process detail from 9point75 Woodworks"
+              width={1400}
+              height={1000}
+              className="feature-image"
+            />
+          </div>
+        </div>
         <div className="shell">
-          <SectionHeading
-            eyebrow="How it works"
-            title="A straightforward path from first conversation to final delivery."
-          />
           <div className="process-grid">
             {processSteps.map((step, index) => (
               <article key={step} className="process-card">
@@ -80,6 +107,15 @@ export default async function Home() {
               eyebrow="Materials"
               title="Hardwoods and specialty species selected for durability, warmth, and long-term character."
             />
+            <div className="feature-image-card feature-image-card--materials">
+              <Image
+                src="/home/975-image-2.jpg"
+                alt="Wood species and craftsmanship detail from 9point75 Woodworks"
+                width={1400}
+                height={1000}
+                className="feature-image"
+              />
+            </div>
             <div className="tag-row">
               {materials.map((material) => (
                 <span key={material} className="tag">
