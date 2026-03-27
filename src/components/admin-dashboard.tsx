@@ -7,6 +7,13 @@ type AdminDashboardProps = {
 };
 
 export function AdminDashboard({ leads, attachmentsEnabled }: AdminDashboardProps) {
+  const leadCounts = {
+    new: leads.filter((lead) => lead.status === "new").length,
+    in_review: leads.filter((lead) => lead.status === "in_review").length,
+    responded: leads.filter((lead) => lead.status === "responded").length,
+    closed: leads.filter((lead) => lead.status === "closed").length,
+  };
+
   if (leads.length === 0) {
     return (
       <div className="admin-empty">
@@ -18,6 +25,25 @@ export function AdminDashboard({ leads, attachmentsEnabled }: AdminDashboardProp
 
   return (
     <div className="admin-dashboard">
+      <div className="lead-summary-grid">
+        <article className="lead-summary-card">
+          <span>New</span>
+          <strong>{leadCounts.new}</strong>
+        </article>
+        <article className="lead-summary-card">
+          <span>In review</span>
+          <strong>{leadCounts.in_review}</strong>
+        </article>
+        <article className="lead-summary-card">
+          <span>Responded</span>
+          <strong>{leadCounts.responded}</strong>
+        </article>
+        <article className="lead-summary-card">
+          <span>Closed</span>
+          <strong>{leadCounts.closed}</strong>
+        </article>
+      </div>
+
       {leads.map((lead) => (
         <article key={lead.id} className="lead-card">
           <div className="lead-card__header">
@@ -64,6 +90,12 @@ export function AdminDashboard({ leads, attachmentsEnabled }: AdminDashboardProp
               : attachmentsEnabled
                 ? "No uploads"
                 : "Storage bucket not configured yet"}
+          </div>
+
+          <div className="lead-card__quick-actions">
+            <a className="button button--secondary" href={`mailto:${lead.email}`}>
+              Reply by Email
+            </a>
           </div>
         </article>
       ))}

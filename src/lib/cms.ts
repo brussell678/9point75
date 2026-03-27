@@ -25,6 +25,10 @@ type GalleryItemRecord = {
   created_at: string;
 };
 
+export type GalleryAdminItem = GalleryItemRecord & {
+  image_url: string;
+};
+
 const GALLERY_BUCKET = "gallery-images";
 
 function getPublicGalleryUrl(path: string | null) {
@@ -174,4 +178,27 @@ export async function getSiteContentMap() {
     about_story: byKey.get("about_story"),
     about_philosophy: byKey.get("about_philosophy"),
   };
+}
+
+export async function getGalleryAdminItems(): Promise<GalleryAdminItem[]> {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("gallery_items")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .returns<GalleryItemRecord[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map((item) => ({
+    ...item,
+    image_url: getPublicGalleryUrl(item.image_path),
+  }));
 }

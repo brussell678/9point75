@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboard } from "@/components/admin-dashboard";
-import { ContentEditor } from "@/components/content-editor";
 import { GalleryManager } from "@/components/gallery-manager";
 import { adminFeatures } from "@/content/site-content";
-import { getSiteContentMap } from "@/lib/cms";
+import { getGalleryAdminItems } from "@/lib/cms";
 import { getMissingEnvVars } from "@/lib/env";
 import type { QuoteRequestRecord } from "@/lib/leads";
 import { signOutOwner } from "@/app/sign-in/actions";
@@ -76,7 +75,7 @@ export default async function AdminPage() {
   }
 
   const leads = await getQuoteRequests();
-  const contentMap = await getSiteContentMap();
+  const galleryItems = await getGalleryAdminItems();
   const configured = true;
 
   return (
@@ -84,10 +83,9 @@ export default async function AdminPage() {
       <div className="shell admin-route">
         <div className="admin-route__intro">
           <p className="section-heading__eyebrow">Admin route</p>
-          <h1>Protected owner dashboard scaffold</h1>
+          <h1>Owner dashboard</h1>
           <p>
-            This route is reserved for the business owner. In the next round, we can wire Supabase auth,
-            lead statuses, gallery management, and content editing on top of this foundation.
+            Signed in with Supabase authentication. Use this space to track leads and keep the gallery current.
           </p>
           <div className="button-row">
             <Link href="/contact" className="button button--secondary">
@@ -127,36 +125,8 @@ export default async function AdminPage() {
         <AdminDashboard leads={leads} attachmentsEnabled={configured} />
       </div>
 
-      <div className="shell admin-grid">
-        <ContentEditor
-          sectionKey="hero"
-          title="Homepage hero"
-          heading={contentMap.hero?.heading || ""}
-          body={contentMap.hero?.body || ""}
-          payload={contentMap.hero?.payload || {}}
-        />
-        <ContentEditor
-          sectionKey="about_intro"
-          title="About intro"
-          heading={contentMap.about_intro?.heading || ""}
-          body={contentMap.about_intro?.body || ""}
-          payload={contentMap.about_intro?.payload || {}}
-        />
-        <ContentEditor
-          sectionKey="about_story"
-          title="About story"
-          heading={contentMap.about_story?.heading || ""}
-          body={contentMap.about_story?.body || ""}
-          payload={contentMap.about_story?.payload || {}}
-        />
-        <ContentEditor
-          sectionKey="about_philosophy"
-          title="About philosophy"
-          heading={contentMap.about_philosophy?.heading || ""}
-          body={contentMap.about_philosophy?.body || ""}
-          payload={contentMap.about_philosophy?.payload || {}}
-        />
-        <GalleryManager />
+      <div className="shell admin-grid admin-grid--single">
+        <GalleryManager items={galleryItems} />
       </div>
     </section>
   );

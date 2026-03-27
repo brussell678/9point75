@@ -69,36 +69,44 @@ export async function createGalleryItem(formData: FormData) {
   revalidatePath("/admin");
 }
 
-export async function updateSiteContent(formData: FormData) {
+export async function toggleGalleryPublished(formData: FormData) {
   const supabase = getSupabaseAdminClient();
   if (!supabase) {
     return;
   }
 
-  const sectionKey = getTextValue(formData, "sectionKey");
-  const heading = getTextValue(formData, "heading");
-  const body = getTextValue(formData, "body");
-  const payloadText = getTextValue(formData, "payload");
+  const id = getTextValue(formData, "id");
+  const published = getTextValue(formData, "published") === "true";
 
-  let payload = {};
-
-  if (payloadText) {
-    try {
-      payload = JSON.parse(payloadText);
-    } catch {
-      payload = {};
-    }
+  if (!id) {
+    return;
   }
 
-  await supabase.from("site_content").upsert({
-    section_key: sectionKey,
-    heading,
-    body,
-    payload,
-    updated_at: new Date().toISOString(),
-  });
+  await supabase.from("gallery_items").update({ published: !published }).eq("id", id);
 
-  revalidatePath("/");
-  revalidatePath("/about");
+  revalidatePath("/gallery");
+  revalidatePath("/admin");
+}
+
+export async function deleteGalleryItem(formData: FormData) {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return;
+  }
+
+  const id = getTextValue(formData, "id");
+  const imagePath = getTextValue(formData, "imagePath");
+
+  if (!id) {
+    return;
+  }
+
+  if (imagePath) {
+    await supabase.storage.from(GALLERY_BUCKET).remove([imagePath]);
+  }
+
+  await supabase.from("gallery_items").delete().eq("id", id);
+
+  revalidatePath("/gallery");
   revalidatePath("/admin");
 }
