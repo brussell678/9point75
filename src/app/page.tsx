@@ -54,11 +54,24 @@ export default async function Home() {
       </section>
 
       <section className="section">
+        <div className="shell process-section">
+          <div>
+            <SectionHeading
+              eyebrow="Why clients hire 9point75"
+              title="A custom process that stays personal without feeling informal."
+            />
+          </div>
+          <div className="feature-image-card feature-image-card--value">
+            <Image
+              src="/home/975-image-4.jpg"
+              alt="Finished custom woodworking detail from 9point75 Woodworks"
+              width={1400}
+              height={1000}
+              className="feature-image"
+            />
+          </div>
+        </div>
         <div className="shell">
-          <SectionHeading
-            eyebrow="Why clients hire 9point75"
-            title="A custom process that stays personal without feeling informal."
-          />
           <div className="cards-grid">
             {valueProps.map((item) => (
               <article key={item.title} className="info-card">

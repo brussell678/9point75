@@ -227,12 +227,14 @@ select {
 
 .hero__grid {
   grid-template-columns: 1.8fr 1fr;
-  align-items: end;
+  align-items: start;
 }
 
 .hero__side {
   display: grid;
   gap: 1rem;
+  align-content: start;
+  padding-top: 0.85rem;
 }
 
 .hero__eyebrow,
@@ -252,6 +254,10 @@ select {
 .cta-banner h2 {
   font-size: clamp(3rem, 9vw, 5.6rem);
   max-width: 12ch;
+}
+
+.hero h1 {
+  max-width: 9ch;
 }
 
 .hero__description,
@@ -311,6 +317,7 @@ select {
 }
 
 .feature-image-card--process .feature-image,
+.feature-image-card--value .feature-image,
 .feature-image-card--materials .feature-image {
   aspect-ratio: 16 / 10;
 }
