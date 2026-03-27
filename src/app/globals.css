@@ -23,16 +23,27 @@ body {
 }
 
 body {
+  position: relative;
   min-height: 100%;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(191, 135, 80, 0.09), transparent 24%),
-    linear-gradient(180deg, #f9f3ea 0%, var(--bg) 44%, #ebdfd0 100%);
+  background: var(--bg);
   font-family: var(--font-body), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 30%),
+    radial-gradient(circle at top right, rgba(191, 135, 80, 0.08), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.35), transparent 20%),
+    linear-gradient(180deg, #f9f3ea 0%, var(--bg) 44%, #ebdfd0 100%);
 }
 
 * {
@@ -283,7 +294,7 @@ select {
 }
 
 .section--contrast {
-  background: linear-gradient(180deg, rgba(232, 216, 196, 0.4), rgba(255, 248, 238, 0.35));
+  background: transparent;
   border-block: 1px solid var(--line);
 }
 
@@ -668,7 +679,7 @@ select {
 .site-footer {
   padding: 2rem 0 3rem;
   border-top: 1px solid var(--line);
-  background: rgba(255, 249, 241, 0.55);
+  background: transparent;
 }
 
 .site-footer__grid {
