@@ -103,21 +103,10 @@ export default async function Home() {
       <section className="section">
         <div className="shell split-layout">
           <div>
-            <div className="materials-intro">
-              <SectionHeading
-                eyebrow="Materials"
-                title="Hardwoods and specialty species selected for durability, warmth, and long-term character."
-              />
-              <div className="feature-image-card feature-image-card--materials">
-                <Image
-                  src="/home/975-image-2.jpg"
-                  alt="Wood species and craftsmanship detail from 9point75 Woodworks"
-                  width={1400}
-                  height={1000}
-                  className="feature-image"
-                />
-              </div>
-            </div>
+            <SectionHeading
+              eyebrow="Materials"
+              title="Hardwoods and specialty species selected for durability, warmth, and long-term character."
+            />
             <div className="tag-row">
               {materials.map((material) => (
                 <span key={material} className="tag">
@@ -127,13 +116,25 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="trust-card">
-            <p className="section-heading__eyebrow">Trust signals</p>
-            <ul className="check-list">
-              {trustPoints.map((point) => (
-                <li key={point}>{point}</li>
-              ))}
-            </ul>
+          <div className="materials-side">
+            <div className="feature-image-card feature-image-card--materials">
+              <Image
+                src="/home/975-image-2.jpg"
+                alt="Wood species and craftsmanship detail from 9point75 Woodworks"
+                width={1400}
+                height={1000}
+                className="feature-image"
+              />
+            </div>
+
+            <div className="trust-card">
+              <p className="section-heading__eyebrow">Trust signals</p>
+              <ul className="check-list">
+                {trustPoints.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>

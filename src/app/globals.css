@@ -390,16 +390,14 @@ select {
   align-items: start;
 }
 
-.materials-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
-  gap: 1.25rem;
-  align-items: end;
-  margin-bottom: 1rem;
-}
-
 .split-layout--wide {
   grid-template-columns: 1.4fr 0.8fr;
+}
+
+.materials-side {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
 }
 
 .check-list {
@@ -896,7 +894,6 @@ select {
   .split-layout--wide,
   .admin-route,
   .process-section,
-  .materials-intro,
   .cards-grid,
   .site-footer__grid,
   .gallery-grid,
