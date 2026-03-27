@@ -6,7 +6,7 @@ import { GalleryManager } from "@/components/gallery-manager";
 import { adminFeatures } from "@/content/site-content";
 import { getGalleryAdminItems } from "@/lib/cms";
 import { getMissingEnvVars } from "@/lib/env";
-import type { QuoteRequestRecord } from "@/lib/leads";
+import type { AdminQuoteRequestRecord, QuoteRequestRecord } from "@/lib/leads";
 import { signOutOwner } from "@/app/sign-in/actions";
 import { isAuthorizedAdmin } from "@/lib/auth";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -33,7 +33,46 @@ async function getQuoteRequests() {
     return [];
   }
 
-  return data;
+  const allPaths = data.flatMap((lead) => lead.attachment_paths);
+  const signedUrlMap = new Map<string, string>();
+
+  if (allPaths.length > 0) {
+    const { data: signedUrls } = await supabase.storage
+      .from("quote-request-files")
+      .createSignedUrls(allPaths, 60 * 60);
+
+    signedUrls?.forEach((item, index) => {
+      const path = allPaths[index];
+      if (path && item?.signedUrl) {
+        signedUrlMap.set(path, item.signedUrl);
+      }
+    });
+  }
+
+  return data.map<AdminQuoteRequestRecord>((lead) => ({
+    ...lead,
+    attachments: lead.attachment_paths
+      .map((path) => {
+        const url = signedUrlMap.get(path);
+        if (!url) {
+          return null;
+        }
+
+        const name = path.split("/").pop() || "attachment";
+        const lowerName = name.toLowerCase();
+        const isImage = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"].some((extension) =>
+          lowerName.endsWith(extension),
+        );
+
+        return {
+          path,
+          url,
+          name,
+          isImage,
+        };
+      })
+      .filter((attachment) => attachment !== null),
+  }));
 }
 
 export default async function AdminPage() {

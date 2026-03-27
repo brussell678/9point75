@@ -17,6 +17,17 @@ export type QuoteRequestRecord = QuoteRequestInsert & {
   created_at: string;
 };
 
+export type QuoteAttachment = {
+  path: string;
+  url: string;
+  name: string;
+  isImage: boolean;
+};
+
+export type AdminQuoteRequestRecord = QuoteRequestRecord & {
+  attachments: QuoteAttachment[];
+};
+
 export const quoteStatusLabels: Record<QuoteRequestRecord["status"], string> = {
   new: "New",
   in_review: "In review",

@@ -1,8 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 import { updateLeadStatus } from "@/app/admin/actions";
-import { quoteStatusLabels, type QuoteRequestRecord } from "@/lib/leads";
+import {
+  quoteStatusLabels,
+  type AdminQuoteRequestRecord,
+} from "@/lib/leads";
 
 type AdminDashboardProps = {
-  leads: QuoteRequestRecord[];
+  leads: AdminQuoteRequestRecord[];
   attachmentsEnabled: boolean;
 };
 
@@ -85,12 +89,46 @@ export function AdminDashboard({ leads, attachmentsEnabled }: AdminDashboardProp
 
           <div className="lead-card__attachments">
             <strong>Attachments:</strong>{" "}
-            {lead.attachment_paths.length > 0
-              ? `${lead.attachment_paths.length} file(s) stored in Supabase`
+            {lead.attachments.length > 0
+              ? `${lead.attachments.length} file(s) ready to open`
               : attachmentsEnabled
                 ? "No uploads"
                 : "Storage bucket not configured yet"}
           </div>
+
+          {lead.attachments.length > 0 ? (
+            <div className="lead-attachments-list">
+              {lead.attachments.map((attachment) => (
+                <article key={attachment.path} className="lead-attachment-card">
+                  {attachment.isImage ? (
+                    <a href={attachment.url} target="_blank" rel="noreferrer" className="lead-attachment-card__preview">
+                      <img src={attachment.url} alt={attachment.name} className="lead-attachment-card__image" />
+                    </a>
+                  ) : null}
+                  <div className="lead-attachment-card__body">
+                    <p>{attachment.name}</p>
+                    <div className="lead-attachment-card__actions">
+                      <a
+                        className="button button--secondary"
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open
+                      </a>
+                      <a
+                        className="button button--secondary"
+                        href={attachment.url}
+                        download={attachment.name}
+                      >
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : null}
 
           <div className="lead-card__quick-actions">
             <a className="button button--secondary" href={`mailto:${lead.email}`}>
