@@ -227,13 +227,14 @@ select {
 
 .hero__grid {
   grid-template-columns: 1.8fr 1.2fr;
-  align-items: start;
+  align-items: stretch;
 }
 
 .hero__side {
-  display: grid;
-  gap: 1.25rem;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
   padding-top: 0.5rem;
 }
 
@@ -257,7 +258,7 @@ select {
 }
 
 .hero h1 {
-  max-width: 10.5ch;
+  max-width: 11.75ch;
 }
 
 .feature-image-card--hero,
