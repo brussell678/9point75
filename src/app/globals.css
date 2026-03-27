@@ -365,6 +365,10 @@ select {
   max-width: 13ch;
 }
 
+.process-section .section-heading h2 {
+  max-width: 15ch;
+}
+
 .cards-grid,
 .process-grid,
 .site-footer__grid,
