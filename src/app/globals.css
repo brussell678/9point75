@@ -625,6 +625,23 @@ select {
   background: rgba(255, 255, 255, 0.82);
 }
 
+.password-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.password-toggle {
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 250, 240, 0.9);
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
 .admin-route--stacked {
   margin-top: 1rem;
 }
@@ -808,6 +825,10 @@ select {
   .admin-preview__status {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .password-field {
+    grid-template-columns: 1fr;
   }
 
   .button {

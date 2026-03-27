@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { signInOwner, type SignInState } from "@/app/sign-in/actions";
 
 const initialState: SignInState = {};
@@ -11,6 +11,7 @@ type SignInFormProps = {
 
 export function SignInForm({ next }: SignInFormProps) {
   const [state, formAction, pending] = useActionState(signInOwner, initialState);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form className="sign-in-form" action={formAction}>
@@ -23,7 +24,23 @@ export function SignInForm({ next }: SignInFormProps) {
 
       <label>
         Password
-        <input type="password" name="password" autoComplete="current-password" required />
+        <div className="password-field">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            autoComplete="current-password"
+            required
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            aria-pressed={showPassword}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((value) => !value)}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
       </label>
 
       {state.error ? <p className="form-error">{state.error}</p> : null}
