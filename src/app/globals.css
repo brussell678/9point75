@@ -1047,12 +1047,13 @@ select {
   }
 
   .brand {
-    align-items: flex-start;
+    align-items: center;
     gap: 0.8rem;
   }
 
   .brand__text {
     font-size: 0.82rem;
+    text-align: center;
   }
 
   .brand__text strong {
