@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   },
   description:
     "Custom cabinetry, built-ins, and heirloom furniture handcrafted in Jacksonville, North Carolina.",
+  icons: {
+    icon: "/brand/9point75_logo.jpg",
+    apple: "/brand/9point75_logo.jpg",
+  },
 };
 
 export default function RootLayout({

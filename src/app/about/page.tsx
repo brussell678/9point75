@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { SectionHeading } from "@/components/section-heading";
-import { aboutSections, materials, trustPoints } from "@/content/site-content";
+import { materials, trustPoints } from "@/content/site-content";
+import { getAboutContentFromCms } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "About",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const aboutSections = await getAboutContentFromCms();
+
   return (
     <>
       <section className="page-hero">

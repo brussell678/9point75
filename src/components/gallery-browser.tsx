@@ -1,29 +1,32 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import clsx from "clsx";
 import {
   galleryCategories,
-  galleryItems,
   type GalleryCategory,
   type GalleryItem,
 } from "@/content/site-content";
 
 const PAGE_SIZE = 10;
 
-export function GalleryBrowser() {
+type GalleryBrowserProps = {
+  items: GalleryItem[];
+};
+
+export function GalleryBrowser({ items }: GalleryBrowserProps) {
   const [activeCategory, setActiveCategory] = useState<GalleryCategory>("All");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeItem, setActiveItem] = useState<GalleryItem | null>(null);
 
   const filteredItems = useMemo(() => {
     if (activeCategory === "All") {
-      return galleryItems;
+      return items;
     }
 
-    return galleryItems.filter((item) => item.category === activeCategory);
-  }, [activeCategory]);
+    return items.filter((item) => item.category === activeCategory);
+  }, [activeCategory, items]);
 
   const visibleItems = filteredItems.slice(0, visibleCount);
   const hasMore = visibleCount < filteredItems.length;
@@ -57,7 +60,7 @@ export function GalleryBrowser() {
             onClick={() => setActiveItem(item)}
           >
             <div className="gallery-card__image-wrap">
-              <Image src={item.image} alt={item.alt} fill sizes="(max-width: 768px) 100vw, 33vw" />
+              <img src={item.image} alt={item.alt} className="gallery-image" />
             </div>
             <div className="gallery-card__body">
               <p className="gallery-card__category">{item.category}</p>
@@ -98,13 +101,7 @@ export function GalleryBrowser() {
               Close
             </button>
             <div className="gallery-modal__image-wrap">
-              <Image
-                src={activeItem.image}
-                alt={activeItem.alt}
-                fill
-                sizes="100vw"
-                priority
-              />
+              <img src={activeItem.image} alt={activeItem.alt} className="gallery-image" />
             </div>
             <div className="gallery-modal__content">
               <p className="gallery-card__category">{activeItem.category}</p>

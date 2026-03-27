@@ -1,8 +1,16 @@
+"use client";
+
+import { useActionState } from "react";
+import { submitQuoteRequest, type QuoteFormState } from "@/app/contact/actions";
 import { budgetRanges, projectTypes, timelineOptions } from "@/content/site-content";
 
+const initialState: QuoteFormState = {};
+
 export function QuoteForm() {
+  const [state, formAction, pending] = useActionState(submitQuoteRequest, initialState);
+
   return (
-    <form className="quote-form">
+    <form className="quote-form" action={formAction}>
       <div className="form-grid">
         <label>
           Name
@@ -84,8 +92,10 @@ export function QuoteForm() {
       </label>
 
       <div className="quote-form__actions">
-        <button type="submit" className="button button--primary">
-          Submit Request
+        {state.error ? <p className="form-error">{state.error}</p> : null}
+        {state.success ? <p className="form-success">{state.success}</p> : null}
+        <button type="submit" className="button button--primary" disabled={pending}>
+          {pending ? "Submitting..." : "Submit Request"}
         </button>
         <p>Production wiring will store submissions and uploads in Supabase with owner email notifications.</p>
       </div>

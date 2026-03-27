@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { AdminPreview } from "@/components/admin-preview";
 import { SectionHeading } from "@/components/section-heading";
+import { getHeroContentFromCms } from "@/lib/cms";
 import {
-  heroContent,
   materials,
   processSteps,
   trustPoints,
   valueProps,
 } from "@/content/site-content";
 
-export default function Home() {
+export default async function Home() {
+  const heroContent = await getHeroContentFromCms();
+
   return (
     <>
       <section className="hero">

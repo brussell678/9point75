@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { adminFeatures } from "@/content/site-content";
-import { hasSupabaseEnv } from "@/lib/supabase";
+import { hasSupabaseEnv } from "@/lib/supabase/browser";
 
 export function AdminPreview() {
   const configured = hasSupabaseEnv();

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { contactDetails, navigationLinks, socialLinks } from "@/content/site-content";
 
@@ -6,10 +7,21 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="shell site-footer__grid">
         <div className="footer-block">
-          <p className="footer-eyebrow">9point75 Woodworks</p>
-          <p className="footer-copy">
-            Custom cabinetry, furniture, and specialty builds with a calm, client-first process.
-          </p>
+          <div className="footer-brand">
+            <Image
+              src="/brand/9point75_logo.jpg"
+              alt="9point75 Woodworks logo"
+              width={500}
+              height={500}
+              className="footer-brand__logo"
+            />
+            <div>
+              <p className="footer-eyebrow">9point75 Woodworks</p>
+              <p className="footer-copy">
+                Custom cabinetry, furniture, and specialty builds with a calm, client-first process.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="footer-block">
