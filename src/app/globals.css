@@ -135,19 +135,20 @@ select {
 }
 
 .brand__logo-wrap {
-  width: 3.6rem;
-  height: 3.6rem;
+  width: 3.4rem;
+  height: 4.25rem;
   border-radius: 1rem;
   overflow: hidden;
   border: 1px solid rgba(63, 42, 24, 0.12);
   box-shadow: 0 10px 24px rgba(44, 28, 16, 0.12);
   background: #fff8ef;
+  flex-shrink: 0;
 }
 
 .brand__logo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .brand__text {
@@ -942,8 +943,22 @@ select {
   }
 
   .brand__logo-wrap {
-    width: 3.15rem;
-    height: 3.15rem;
+    width: 2.75rem;
+    height: 3.6rem;
+    border-radius: 0.85rem;
+  }
+
+  .brand {
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .brand__text {
+    font-size: 0.82rem;
+  }
+
+  .brand__text strong {
+    font-size: 0.95rem;
   }
 
   .button-row,
