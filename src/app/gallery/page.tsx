@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { GalleryBrowser } from "@/components/gallery-browser";
 import { SectionHeading } from "@/components/section-heading";
@@ -13,12 +14,23 @@ export default async function GalleryPage() {
   return (
     <>
       <section className="page-hero">
-        <div className="shell">
-          <SectionHeading
-            eyebrow="Gallery"
-            title="A closer look at custom work shaped by detail, durability, and the way each piece is meant to live in a space."
-            description="Browse recent categories, open images for a fuller view, and check back as new projects are added over time."
-          />
+        <div className="shell process-section">
+          <div>
+            <SectionHeading
+              eyebrow="Gallery"
+              title="A closer look at custom work shaped by detail, durability, and the way each piece is meant to live in a space."
+              description="Browse recent categories, open images for a fuller view, and check back as new projects are added over time."
+            />
+          </div>
+          <div className="feature-image-card feature-image-card--gallery">
+            <Image
+              src="/home/975-image-5.jpg"
+              alt="Gallery preview image from 9point75 Woodworks"
+              width={1400}
+              height={1000}
+              className="feature-image"
+            />
+          </div>
         </div>
       </section>
 
