@@ -335,6 +335,7 @@ select {
 .feature-image-card--process .feature-image,
 .feature-image-card--value .feature-image,
 .feature-image-card--gallery .feature-image,
+.feature-image-card--about .feature-image,
 .feature-image-card--materials .feature-image {
   aspect-ratio: 16 / 10;
 }

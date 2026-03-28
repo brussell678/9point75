@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { SectionHeading } from "@/components/section-heading";
 import { materials, trustPoints } from "@/content/site-content";
@@ -13,12 +14,23 @@ export default async function AboutPage() {
   return (
     <>
       <section className="page-hero">
-        <div className="shell">
-          <SectionHeading
-            eyebrow="About the shop"
-            title="Craftsmanship without compromise, built around practical design and close communication."
-            description={aboutSections.intro}
-          />
+        <div className="shell process-section">
+          <div>
+            <SectionHeading
+              eyebrow="About the shop"
+              title="Craftsmanship without compromise, built around practical design and close communication."
+              description={aboutSections.intro}
+            />
+          </div>
+          <div className="feature-image-card feature-image-card--about">
+            <Image
+              src="/home/975-image-6.jpg"
+              alt="About the shop image for 9point75 Woodworks"
+              width={1400}
+              height={1000}
+              className="feature-image"
+            />
+          </div>
         </div>
       </section>
 
