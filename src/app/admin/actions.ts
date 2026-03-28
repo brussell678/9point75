@@ -40,27 +40,34 @@ export async function createGalleryItem(formData: FormData) {
   const imageAlt = getTextValue(formData, "imageAlt");
   const file = formData.get("image");
 
-  if (!title || !category || !description || !imageAlt) {
+  if (!category || !(file instanceof File) || file.size === 0) {
     return;
   }
 
   let imagePath: string | null = null;
+  const safeBaseName = (title || file.name || category)
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
-  if (file instanceof File && file.size > 0) {
-    const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-    imagePath = `${Date.now()}-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.${extension}`;
-    await supabase.storage.from(GALLERY_BUCKET).upload(imagePath, file, {
-      contentType: file.type || "application/octet-stream",
-      upsert: false,
-    });
-  }
+  const finalTitle = title || safeBaseName.replace(/-/g, " ") || category;
+  const finalDescription = description || `Custom ${category.toLowerCase()} piece by 9point75 Woodworks.`;
+  const finalImageAlt = imageAlt || finalTitle;
+
+  const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+  imagePath = `${Date.now()}-${safeBaseName || "gallery-item"}.${extension}`;
+  await supabase.storage.from(GALLERY_BUCKET).upload(imagePath, file, {
+    contentType: file.type || "application/octet-stream",
+    upsert: false,
+  });
 
   await supabase.from("gallery_items").insert({
-    title,
+    title: finalTitle,
     category,
-    description,
+    description: finalDescription,
     image_path: imagePath,
-    image_alt: imageAlt,
+    image_alt: finalImageAlt,
     published: true,
   });
 

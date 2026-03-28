@@ -23,7 +23,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
         <form action={createGalleryItem} className="admin-form">
           <label>
             Title
-            <input type="text" name="title" required />
+            <input type="text" name="title" placeholder="Optional" />
           </label>
 
           <label>
@@ -44,17 +44,17 @@ export function GalleryManager({ items }: GalleryManagerProps) {
 
           <label>
             Description
-            <textarea name="description" rows={4} required />
+            <textarea name="description" rows={4} placeholder="Optional" />
           </label>
 
           <label>
             Image alt text
-            <input type="text" name="imageAlt" required />
+            <input type="text" name="imageAlt" placeholder="Optional" />
           </label>
 
           <label>
             Thumbnail image
-            <input type="file" name="image" accept="image/*" />
+            <input type="file" name="image" accept="image/*" required />
           </label>
 
           <button type="submit" className="button button--primary">
