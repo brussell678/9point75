@@ -286,6 +286,10 @@ select {
   font-size: 1.05rem;
 }
 
+.hero__content .button-row {
+  margin-top: 1.35rem;
+}
+
 .hero__aside,
 .trust-card,
 .info-card,
