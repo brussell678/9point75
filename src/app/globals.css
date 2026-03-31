@@ -904,6 +904,19 @@ select {
   color: var(--muted);
 }
 
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+}
+
+.social-link__icon {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
 .contact-note {
   margin-top: 1rem;
   color: var(--muted);

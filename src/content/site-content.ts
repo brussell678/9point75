@@ -5,8 +5,14 @@ export const navigationLinks = [
 ];
 
 export const socialLinks = [
-  { href: "#", label: "Instagram" },
-  { href: "#", label: "Facebook" },
+  {
+    href: "https://www.instagram.com/9point75woodworks?igsh=MW5jMzc5Z2ZqOHh6eQ==",
+    label: "Instagram",
+  },
+  {
+    href: "https://www.facebook.com/share/1LHSyG7Dvf/",
+    label: "Facebook",
+  },
 ];
 
 export const contactDetails = {

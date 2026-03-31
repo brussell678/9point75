@@ -2,6 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { contactDetails, navigationLinks, socialLinks } from "@/content/site-content";
 
+function SocialIcon({ label }: { label: string }) {
+  if (label === "Instagram") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="social-link__icon">
+        <rect x="3" y="3" width="18" height="18" rx="5" ry="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="social-link__icon">
+      <path
+        d="M13.5 21v-7h2.9l.5-3h-3.4V9.2c0-.9.3-1.5 1.6-1.5H17V5.1c-.3 0-1.2-.1-2.4-.1-2.4 0-4 1.5-4 4.3V11H8v3h2.6v7h2.9Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="site-footer">
@@ -48,8 +69,15 @@ export function SiteFooter() {
           <p className="footer-eyebrow">Social</p>
           <div className="footer-links">
             {socialLinks.map((link) => (
-              <a key={link.label} href={link.href} aria-disabled={link.href === "#"}>
-                {link.label}
+              <a
+                key={link.label}
+                href={link.href}
+                className="social-link"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <SocialIcon label={link.label} />
+                <span>{link.label}</span>
               </a>
             ))}
           </div>
