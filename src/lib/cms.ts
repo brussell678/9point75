@@ -63,7 +63,25 @@ export async function getGalleryItemsFromCms(): Promise<GalleryItem[]> {
     return galleryItems;
   }
 
-  return data.map((item, index) => ({
+  const uniqueItems = data.filter((item, index, collection) => {
+    const signature = [item.title, item.category, item.description, item.image_path].join("::");
+
+    return (
+      index ===
+      collection.findIndex((candidate) => {
+        const candidateSignature = [
+          candidate.title,
+          candidate.category,
+          candidate.description,
+          candidate.image_path,
+        ].join("::");
+
+        return candidateSignature === signature;
+      })
+    );
+  });
+
+  return uniqueItems.map((item, index) => ({
     id: index + 1,
     title: item.title,
     category: item.category,

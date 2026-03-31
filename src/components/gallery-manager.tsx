@@ -1,4 +1,6 @@
-import Image from "next/image";
+"use client";
+
+import { useFormStatus } from "react-dom";
 import {
   createGalleryItem,
   deleteGalleryItem,
@@ -10,6 +12,16 @@ import type { GalleryAdminItem } from "@/lib/cms";
 type GalleryManagerProps = {
   items: GalleryAdminItem[];
 };
+
+function GallerySubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button type="submit" className="button button--primary" disabled={pending}>
+      {pending ? "Saving..." : "Save Gallery Item"}
+    </button>
+  );
+}
 
 export function GalleryManager({ items }: GalleryManagerProps) {
   return (
@@ -57,9 +69,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
             <input type="file" name="image" accept="image/*" required />
           </label>
 
-          <button type="submit" className="button button--primary">
-            Save Gallery Item
-          </button>
+          <GallerySubmitButton />
         </form>
       </div>
 
@@ -76,11 +86,11 @@ export function GalleryManager({ items }: GalleryManagerProps) {
             {items.map((item) => (
               <article key={item.id} className="gallery-admin-card">
                 <div className="gallery-admin-card__media">
-                  <Image
+                  {/* Admin previews use direct Supabase URLs, so a plain image keeps them reliable without extra remote config. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={item.image_url}
                     alt={item.image_alt}
-                    width={240}
-                    height={180}
                     className="gallery-admin-card__image"
                   />
                 </div>
