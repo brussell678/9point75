@@ -872,6 +872,32 @@ select {
   align-items: center;
 }
 
+.gallery-admin-card__editor {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.gallery-admin-card__editor summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.gallery-admin-card__editor[open] summary {
+  margin-bottom: 0.35rem;
+}
+
+.admin-form--compact {
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 250, 243, 0.82);
+}
+
 .footer-links {
   display: grid;
   gap: 0.45rem;

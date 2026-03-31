@@ -5,6 +5,7 @@ import {
   createGalleryItem,
   deleteGalleryItem,
   toggleGalleryPublished,
+  updateGalleryItem,
 } from "@/app/admin/actions";
 import { galleryCategories } from "@/content/site-content";
 import type { GalleryAdminItem } from "@/lib/cms";
@@ -19,6 +20,16 @@ function GallerySubmitButton() {
   return (
     <button type="submit" className="button button--primary" disabled={pending}>
       {pending ? "Saving..." : "Save Gallery Item"}
+    </button>
+  );
+}
+
+function GalleryUpdateButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button type="submit" className="button button--primary" disabled={pending}>
+      {pending ? "Saving..." : "Save Changes"}
     </button>
   );
 }
@@ -120,6 +131,48 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                       </button>
                     </form>
                   </div>
+                  <details className="gallery-admin-card__editor">
+                    <summary>Edit item</summary>
+                    <form action={updateGalleryItem} className="admin-form admin-form--compact">
+                      <input type="hidden" name="id" value={item.id} />
+                      <input type="hidden" name="currentImagePath" value={item.image_path || ""} />
+
+                      <label>
+                        Title
+                        <input type="text" name="title" defaultValue={item.title} />
+                      </label>
+
+                      <label>
+                        Category
+                        <select name="category" defaultValue={item.category} required>
+                          {galleryCategories
+                            .filter((category) => category !== "All")
+                            .map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+
+                      <label>
+                        Description
+                        <textarea name="description" rows={3} defaultValue={item.description} />
+                      </label>
+
+                      <label>
+                        Image alt text
+                        <input type="text" name="imageAlt" defaultValue={item.image_alt} />
+                      </label>
+
+                      <label>
+                        Replace image
+                        <input type="file" name="image" accept="image/*" />
+                      </label>
+
+                      <GalleryUpdateButton />
+                    </form>
+                  </details>
                 </div>
               </article>
             ))}
