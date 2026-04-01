@@ -19,5 +19,9 @@ export async function getAuthorizedAdminEmail(request: Request) {
     return null;
   }
 
-  return user.email ?? null;
+  if (!user?.email) {
+    return null;
+  }
+
+  return user.email;
 }
