@@ -5,6 +5,12 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { QuoteRequestRecord } from "@/lib/leads";
 
 const GALLERY_BUCKET = "gallery-images";
+const MAX_GALLERY_IMAGE_SIZE = 10 * 1024 * 1024;
+
+export type GalleryActionState = {
+  error?: string;
+  success?: string;
+};
 
 function getTextValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -19,10 +25,26 @@ function getSafeBaseName(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+function validateGalleryImage(file: File) {
+  if (file.size === 0) {
+    return "Choose an image to upload.";
+  }
+
+  if (!file.type.startsWith("image/")) {
+    return "Only image files can be uploaded to the gallery.";
+  }
+
+  if (file.size > MAX_GALLERY_IMAGE_SIZE) {
+    return "Image must be 10 MB or smaller.";
+  }
+
+  return null;
+}
+
 async function uploadGalleryImage(file: File, title: string, category: string) {
   const supabase = getSupabaseAdminClient();
   if (!supabase) {
-    return null;
+    throw new Error("Supabase is not configured for gallery uploads yet.");
   }
 
   const safeBaseName = getSafeBaseName(title || file.name || category);
@@ -35,7 +57,7 @@ async function uploadGalleryImage(file: File, title: string, category: string) {
   });
 
   if (error) {
-    return null;
+    throw new Error(error.message);
   }
 
   return imagePath;
@@ -58,10 +80,15 @@ export async function updateLeadStatus(formData: FormData) {
   revalidatePath("/admin");
 }
 
-export async function createGalleryItem(formData: FormData) {
+export async function createGalleryItem(
+  _previousState: GalleryActionState,
+  formData: FormData,
+): Promise<GalleryActionState> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) {
-    return;
+    return {
+      error: "Supabase is not configured yet.",
+    };
   }
 
   const title = getTextValue(formData, "title");
@@ -70,38 +97,71 @@ export async function createGalleryItem(formData: FormData) {
   const imageAlt = getTextValue(formData, "imageAlt");
   const file = formData.get("image");
 
-  if (!category || !(file instanceof File) || file.size === 0) {
-    return;
+  if (!category) {
+    return {
+      error: "Choose a gallery category.",
+    };
   }
 
-  const safeBaseName = getSafeBaseName(title || file.name || category);
-  const finalTitle = title || safeBaseName.replace(/-/g, " ") || category;
-  const finalDescription = description || `Custom ${category.toLowerCase()} piece by 9point75 Woodworks.`;
-  const finalImageAlt = imageAlt || finalTitle;
-  const imagePath = await uploadGalleryImage(file, finalTitle, category);
-
-  if (!imagePath) {
-    return;
+  if (!(file instanceof File)) {
+    return {
+      error: "Choose an image to upload.",
+    };
   }
 
-  await supabase.from("gallery_items").insert({
-    title: finalTitle,
-    category,
-    description: finalDescription,
-    image_path: imagePath,
-    image_alt: finalImageAlt,
-    published: true,
-  });
+  const validationError = validateGalleryImage(file);
+  if (validationError) {
+    return {
+      error: validationError,
+    };
+  }
 
-  revalidatePath("/");
-  revalidatePath("/gallery");
-  revalidatePath("/admin");
+  try {
+    const safeBaseName = getSafeBaseName(title || file.name || category);
+    const finalTitle = title || safeBaseName.replace(/-/g, " ") || category;
+    const finalDescription = description || `Custom ${category.toLowerCase()} piece by 9point75 Woodworks.`;
+    const finalImageAlt = imageAlt || finalTitle;
+    const imagePath = await uploadGalleryImage(file, finalTitle, category);
+
+    const { error } = await supabase.from("gallery_items").insert({
+      title: finalTitle,
+      category,
+      description: finalDescription,
+      image_path: imagePath,
+      image_alt: finalImageAlt,
+      published: true,
+    });
+
+    if (error) {
+      return {
+        error: error.message,
+      };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/gallery");
+    revalidatePath("/admin");
+
+    return {
+      success: "Gallery item saved.",
+    };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Something went wrong while uploading the gallery image.",
+    };
+  }
 }
 
-export async function updateGalleryItem(formData: FormData) {
+export async function updateGalleryItem(
+  _previousState: GalleryActionState,
+  formData: FormData,
+): Promise<GalleryActionState> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) {
-    return;
+    return {
+      error: "Supabase is not configured yet.",
+    };
   }
 
   const id = getTextValue(formData, "id");
@@ -113,7 +173,9 @@ export async function updateGalleryItem(formData: FormData) {
   const file = formData.get("image");
 
   if (!id || !category) {
-    return;
+    return {
+      error: "Gallery item information is incomplete.",
+    };
   }
 
   const finalTitle = titleInput || category;
@@ -123,6 +185,13 @@ export async function updateGalleryItem(formData: FormData) {
   let imagePath = currentImagePath || null;
 
   if (file instanceof File && file.size > 0) {
+    const validationError = validateGalleryImage(file);
+    if (validationError) {
+      return {
+        error: validationError,
+      };
+    }
+
     const uploadedPath = await uploadGalleryImage(file, finalTitle, category);
 
     if (uploadedPath) {
@@ -134,7 +203,7 @@ export async function updateGalleryItem(formData: FormData) {
     }
   }
 
-  await supabase
+  const { error } = await supabase
     .from("gallery_items")
     .update({
       title: finalTitle,
@@ -145,8 +214,18 @@ export async function updateGalleryItem(formData: FormData) {
     })
     .eq("id", id);
 
+  if (error) {
+    return {
+      error: error.message,
+    };
+  }
+
   revalidatePath("/gallery");
   revalidatePath("/admin");
+
+  return {
+    success: "Gallery item updated.",
+  };
 }
 
 export async function toggleGalleryPublished(formData: FormData) {

@@ -1,9 +1,11 @@
 "use client";
 
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import {
   createGalleryItem,
   deleteGalleryItem,
+  type GalleryActionState,
   toggleGalleryPublished,
   updateGalleryItem,
 } from "@/app/admin/actions";
@@ -13,6 +15,8 @@ import type { GalleryAdminItem } from "@/lib/cms";
 type GalleryManagerProps = {
   items: GalleryAdminItem[];
 };
+
+const initialActionState: GalleryActionState = {};
 
 function GallerySubmitButton() {
   const { pending } = useFormStatus();
@@ -34,6 +38,103 @@ function GalleryUpdateButton() {
   );
 }
 
+function CreateGalleryForm() {
+  const [state, formAction] = useActionState(createGalleryItem, initialActionState);
+
+  return (
+    <form action={formAction} className="admin-form">
+      <label>
+        Title
+        <input type="text" name="title" placeholder="Optional" />
+      </label>
+
+      <label>
+        Category
+        <select name="category" defaultValue="" required>
+          <option value="" disabled>
+            Select a category
+          </option>
+          {galleryCategories
+            .filter((category) => category !== "All")
+            .map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+        </select>
+      </label>
+
+      <label>
+        Description
+        <textarea name="description" rows={4} placeholder="Optional" />
+      </label>
+
+      <label>
+        Image alt text
+        <input type="text" name="imageAlt" placeholder="Optional" />
+      </label>
+
+      <label>
+        Thumbnail image
+        <input type="file" name="image" accept="image/*" required />
+      </label>
+
+      <p>Upload JPG, PNG, or WebP images up to 10 MB.</p>
+      {state.error ? <p className="form-error">{state.error}</p> : null}
+      {state.success ? <p className="form-success">{state.success}</p> : null}
+      <GallerySubmitButton />
+    </form>
+  );
+}
+
+function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
+  const [state, formAction] = useActionState(updateGalleryItem, initialActionState);
+
+  return (
+    <form action={formAction} className="admin-form admin-form--compact">
+      <input type="hidden" name="id" value={item.id} />
+      <input type="hidden" name="currentImagePath" value={item.image_path || ""} />
+
+      <label>
+        Title
+        <input type="text" name="title" defaultValue={item.title} />
+      </label>
+
+      <label>
+        Category
+        <select name="category" defaultValue={item.category} required>
+          {galleryCategories
+            .filter((category) => category !== "All")
+            .map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+        </select>
+      </label>
+
+      <label>
+        Description
+        <textarea name="description" rows={3} defaultValue={item.description} />
+      </label>
+
+      <label>
+        Image alt text
+        <input type="text" name="imageAlt" defaultValue={item.image_alt} />
+      </label>
+
+      <label>
+        Replace image
+        <input type="file" name="image" accept="image/*" />
+      </label>
+
+      {state.error ? <p className="form-error">{state.error}</p> : null}
+      {state.success ? <p className="form-success">{state.success}</p> : null}
+      <GalleryUpdateButton />
+    </form>
+  );
+}
+
 export function GalleryManager({ items }: GalleryManagerProps) {
   return (
     <section className="admin-stack">
@@ -43,45 +144,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
           <h2>Add a gallery item</h2>
         </div>
 
-        <form action={createGalleryItem} className="admin-form">
-          <label>
-            Title
-            <input type="text" name="title" placeholder="Optional" />
-          </label>
-
-          <label>
-            Category
-            <select name="category" defaultValue="" required>
-              <option value="" disabled>
-                Select a category
-              </option>
-              {galleryCategories
-                .filter((category) => category !== "All")
-                .map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-            </select>
-          </label>
-
-          <label>
-            Description
-            <textarea name="description" rows={4} placeholder="Optional" />
-          </label>
-
-          <label>
-            Image alt text
-            <input type="text" name="imageAlt" placeholder="Optional" />
-          </label>
-
-          <label>
-            Thumbnail image
-            <input type="file" name="image" accept="image/*" required />
-          </label>
-
-          <GallerySubmitButton />
-        </form>
+        <CreateGalleryForm />
       </div>
 
       <div className="admin-panel">
@@ -133,45 +196,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                   </div>
                   <details className="gallery-admin-card__editor">
                     <summary>Edit item</summary>
-                    <form action={updateGalleryItem} className="admin-form admin-form--compact">
-                      <input type="hidden" name="id" value={item.id} />
-                      <input type="hidden" name="currentImagePath" value={item.image_path || ""} />
-
-                      <label>
-                        Title
-                        <input type="text" name="title" defaultValue={item.title} />
-                      </label>
-
-                      <label>
-                        Category
-                        <select name="category" defaultValue={item.category} required>
-                          {galleryCategories
-                            .filter((category) => category !== "All")
-                            .map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                        </select>
-                      </label>
-
-                      <label>
-                        Description
-                        <textarea name="description" rows={3} defaultValue={item.description} />
-                      </label>
-
-                      <label>
-                        Image alt text
-                        <input type="text" name="imageAlt" defaultValue={item.image_alt} />
-                      </label>
-
-                      <label>
-                        Replace image
-                        <input type="file" name="image" accept="image/*" />
-                      </label>
-
-                      <GalleryUpdateButton />
-                    </form>
+                    <GalleryEditForm item={item} />
                   </details>
                 </div>
               </article>
