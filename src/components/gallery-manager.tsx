@@ -1,48 +1,135 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  createGalleryItem,
   deleteGalleryItem,
-  type GalleryActionState,
   toggleGalleryPublished,
-  updateGalleryItem,
 } from "@/app/admin/actions";
 import { galleryCategories } from "@/content/site-content";
+import {
+  getTextValue,
+  validateGalleryImage,
+  GALLERY_BUCKET,
+} from "@/lib/gallery-admin";
 import type { GalleryAdminItem } from "@/lib/cms";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type GalleryManagerProps = {
   items: GalleryAdminItem[];
 };
 
-const initialActionState: GalleryActionState = {};
-
-function GallerySubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button type="submit" className="button button--primary" disabled={pending}>
-      {pending ? "Saving..." : "Save Gallery Item"}
-    </button>
-  );
-}
-
-function GalleryUpdateButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button type="submit" className="button button--primary" disabled={pending}>
-      {pending ? "Saving..." : "Save Changes"}
-    </button>
-  );
-}
-
 function CreateGalleryForm() {
-  const [state, formAction] = useActionState(createGalleryItem, initialActionState);
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError("");
+    setSuccess("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const title = getTextValue(formData.get("title"));
+    const category = getTextValue(formData.get("category"));
+    const description = getTextValue(formData.get("description"));
+    const imageAlt = getTextValue(formData.get("imageAlt"));
+    const file = formData.get("image");
+
+    if (!category) {
+      setError("Choose a gallery category.");
+      setPending(false);
+      return;
+    }
+
+    if (!(file instanceof File)) {
+      setError("Choose an image to upload.");
+      setPending(false);
+      return;
+    }
+
+    const validationError = validateGalleryImage(file);
+    if (validationError) {
+      setError(validationError);
+      setPending(false);
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setError("Supabase is not configured yet.");
+      setPending(false);
+      return;
+    }
+
+    try {
+      const uploadResponse = await fetch("/api/admin/gallery/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          fileName: file.name,
+        }),
+      });
+
+      const uploadPayload = (await uploadResponse.json()) as { error?: string; path?: string; token?: string };
+      if (!uploadResponse.ok || !uploadPayload.path || !uploadPayload.token) {
+        throw new Error(uploadPayload.error || "Unable to prepare image upload.");
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from(GALLERY_BUCKET)
+        .uploadToSignedUrl(uploadPayload.path, uploadPayload.token, file, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(uploadError.message);
+      }
+
+      const saveResponse = await fetch("/api/admin/gallery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          description,
+          imageAlt,
+          imagePath: uploadPayload.path,
+          fileName: file.name,
+        }),
+      });
+
+      const savePayload = (await saveResponse.json()) as { error?: string; success?: string };
+      if (!saveResponse.ok) {
+        throw new Error(savePayload.error || "Unable to save gallery item.");
+      }
+
+      setSuccess(savePayload.success || "Gallery item saved.");
+      form.reset();
+      router.refresh();
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Something went wrong while uploading the gallery image.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
-    <form action={formAction} className="admin-form">
+    <form onSubmit={handleSubmit} className="admin-form">
       <label>
         Title
         <input type="text" name="title" placeholder="Optional" />
@@ -80,18 +167,133 @@ function CreateGalleryForm() {
       </label>
 
       <p>Upload JPG, PNG, or WebP images up to 10 MB.</p>
-      {state.error ? <p className="form-error">{state.error}</p> : null}
-      {state.success ? <p className="form-success">{state.success}</p> : null}
-      <GallerySubmitButton />
+      {error ? <p className="form-error">{error}</p> : null}
+      {success ? <p className="form-success">{success}</p> : null}
+      <button type="submit" className="button button--primary" disabled={pending}>
+        {pending ? "Saving..." : "Save Gallery Item"}
+      </button>
     </form>
   );
 }
 
 function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
-  const [state, formAction] = useActionState(updateGalleryItem, initialActionState);
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError("");
+    setSuccess("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const title = getTextValue(formData.get("title"));
+    const category = getTextValue(formData.get("category"));
+    const description = getTextValue(formData.get("description"));
+    const imageAlt = getTextValue(formData.get("imageAlt"));
+    const currentImagePath = getTextValue(formData.get("currentImagePath"));
+    const file = formData.get("image");
+
+    let imagePath = "";
+    let fileName = currentImagePath;
+
+    if (file instanceof File && file.size > 0) {
+      const validationError = validateGalleryImage(file);
+      if (validationError) {
+        setError(validationError);
+        setPending(false);
+        return;
+      }
+
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
+        setError("Supabase is not configured yet.");
+        setPending(false);
+        return;
+      }
+
+      try {
+        const uploadResponse = await fetch("/api/admin/gallery/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title,
+            category,
+            fileName: file.name,
+          }),
+        });
+
+        const uploadPayload = (await uploadResponse.json()) as { error?: string; path?: string; token?: string };
+        if (!uploadResponse.ok || !uploadPayload.path || !uploadPayload.token) {
+          throw new Error(uploadPayload.error || "Unable to prepare image upload.");
+        }
+
+        const { error: uploadError } = await supabase.storage
+          .from(GALLERY_BUCKET)
+          .uploadToSignedUrl(uploadPayload.path, uploadPayload.token, file, {
+            contentType: file.type || "application/octet-stream",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          throw new Error(uploadError.message);
+        }
+
+        imagePath = uploadPayload.path;
+        fileName = file.name;
+      } catch (submissionError) {
+        setError(
+          submissionError instanceof Error
+            ? submissionError.message
+            : "Something went wrong while uploading the gallery image.",
+        );
+        setPending(false);
+        return;
+      }
+    }
+
+    try {
+      const response = await fetch(`/api/admin/gallery/${item.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          description,
+          imageAlt,
+          imagePath,
+          currentImagePath,
+          fileName,
+        }),
+      });
+
+      const payload = (await response.json()) as { error?: string; success?: string };
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update gallery item.");
+      }
+
+      setSuccess(payload.success || "Gallery item updated.");
+      router.refresh();
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Something went wrong while updating the gallery item.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
-    <form action={formAction} className="admin-form admin-form--compact">
+    <form onSubmit={handleSubmit} className="admin-form admin-form--compact">
       <input type="hidden" name="id" value={item.id} />
       <input type="hidden" name="currentImagePath" value={item.image_path || ""} />
 
@@ -128,9 +330,11 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
         <input type="file" name="image" accept="image/*" />
       </label>
 
-      {state.error ? <p className="form-error">{state.error}</p> : null}
-      {state.success ? <p className="form-success">{state.success}</p> : null}
-      <GalleryUpdateButton />
+      {error ? <p className="form-error">{error}</p> : null}
+      {success ? <p className="form-success">{success}</p> : null}
+      <button type="submit" className="button button--primary" disabled={pending}>
+        {pending ? "Saving..." : "Save Changes"}
+      </button>
     </form>
   );
 }
