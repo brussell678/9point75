@@ -1,26 +1,21 @@
 import { NextResponse } from "next/server";
-import { isAuthorizedAdmin } from "@/lib/auth";
+import { getAuthorizedAdminEmail } from "@/lib/admin-api-auth";
 import {
   buildGalleryImagePath,
   getTextValue,
   GALLERY_BUCKET,
 } from "@/lib/gallery-admin";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const supabase = await getSupabaseServerClient();
   const adminSupabase = getSupabaseAdminClient();
 
-  if (!supabase || !adminSupabase) {
+  if (!adminSupabase) {
     return NextResponse.json({ error: "Supabase is not configured yet." }, { status: 500 });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!isAuthorizedAdmin(user?.email)) {
+  const adminEmail = await getAuthorizedAdminEmail(request);
+  if (!adminEmail) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -50,5 +45,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     path,
     token: data.token,
+    adminEmail,
   });
 }

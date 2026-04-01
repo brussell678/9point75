@@ -1,9 +1,8 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { isAuthorizedAdmin } from "@/lib/auth";
+import { getAuthorizedAdminEmail } from "@/lib/admin-api-auth";
 import { buildGalleryValues, getTextValue, GALLERY_BUCKET } from "@/lib/gallery-admin";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type RouteContext = {
   params: Promise<{
@@ -12,18 +11,14 @@ type RouteContext = {
 };
 
 export async function PATCH(request: Request, context: RouteContext) {
-  const supabase = await getSupabaseServerClient();
   const adminSupabase = getSupabaseAdminClient();
 
-  if (!supabase || !adminSupabase) {
+  if (!adminSupabase) {
     return NextResponse.json({ error: "Supabase is not configured yet." }, { status: 500 });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!isAuthorizedAdmin(user?.email)) {
+  const adminEmail = await getAuthorizedAdminEmail(request);
+  if (!adminEmail) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -86,5 +81,5 @@ export async function PATCH(request: Request, context: RouteContext) {
   revalidatePath("/gallery");
   revalidatePath("/admin");
 
-  return NextResponse.json({ success: "Gallery item updated." });
+  return NextResponse.json({ success: "Gallery item updated.", adminEmail });
 }

@@ -19,6 +19,30 @@ type GalleryManagerProps = {
   items: GalleryAdminItem[];
 };
 
+async function getAdminAuthHeaders() {
+  const supabase = getSupabaseBrowserClient();
+
+  if (!supabase) {
+    throw new Error("Supabase is not configured yet.");
+  }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error("Your admin session has expired. Please sign in again.");
+  }
+
+  return {
+    supabase,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  };
+}
+
 function CreateGalleryForm() {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -58,19 +82,12 @@ function CreateGalleryForm() {
       return;
     }
 
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) {
-      setError("Supabase is not configured yet.");
-      setPending(false);
-      return;
-    }
-
     try {
+      const { supabase, headers } = await getAdminAuthHeaders();
+
       const uploadResponse = await fetch("/api/admin/gallery/upload", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           title,
           category,
@@ -96,9 +113,7 @@ function CreateGalleryForm() {
 
       const saveResponse = await fetch("/api/admin/gallery", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           title,
           category,
@@ -200,7 +215,7 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
     let imagePath = "";
     let fileName = currentImagePath;
 
-    if (file instanceof File && file.size > 0) {
+      if (file instanceof File && file.size > 0) {
       const validationError = validateGalleryImage(file);
       if (validationError) {
         setError(validationError);
@@ -208,19 +223,12 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
         return;
       }
 
-      const supabase = getSupabaseBrowserClient();
-      if (!supabase) {
-        setError("Supabase is not configured yet.");
-        setPending(false);
-        return;
-      }
-
       try {
+        const { supabase, headers } = await getAdminAuthHeaders();
+
         const uploadResponse = await fetch("/api/admin/gallery/upload", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
           body: JSON.stringify({
             title,
             category,
@@ -258,11 +266,11 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
     }
 
     try {
+      const { headers } = await getAdminAuthHeaders();
+
       const response = await fetch(`/api/admin/gallery/${item.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           title,
           category,
