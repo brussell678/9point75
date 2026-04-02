@@ -1,5 +1,6 @@
 import {
   aboutSections,
+  galleryCategories,
   galleryItems,
   heroContent,
   type GalleryItem,
@@ -53,6 +54,9 @@ export type GalleryAdminItem = {
 };
 
 const GALLERY_BUCKET = "gallery-images";
+const orderedGalleryCategories = galleryCategories.filter(
+  (category): category is Exclude<GalleryCategory, "All"> => category !== "All",
+);
 
 function getPublicGalleryUrl(path: string | null) {
   if (!path) {
@@ -70,6 +74,28 @@ function getPublicGalleryUrl(path: string | null) {
 
 function getProjectSlug(item: GalleryItemRecord) {
   return item.project_slug || buildGalleryProjectKey(item.title, item.category);
+}
+
+function sortGalleryProjects<T extends { category: Exclude<GalleryCategory, "All">; created_at?: string; title: string }>(
+  items: T[],
+) {
+  return [...items].sort((left, right) => {
+    const leftCategoryIndex = orderedGalleryCategories.indexOf(left.category);
+    const rightCategoryIndex = orderedGalleryCategories.indexOf(right.category);
+
+    if (leftCategoryIndex !== rightCategoryIndex) {
+      return leftCategoryIndex - rightCategoryIndex;
+    }
+
+    const leftCreatedAt = left.created_at ? new Date(left.created_at).getTime() : 0;
+    const rightCreatedAt = right.created_at ? new Date(right.created_at).getTime() : 0;
+
+    if (leftCreatedAt !== rightCreatedAt) {
+      return rightCreatedAt - leftCreatedAt;
+    }
+
+    return left.title.localeCompare(right.title);
+  });
 }
 
 function groupGalleryRecords(items: GalleryItemRecord[]) {
@@ -117,7 +143,8 @@ function groupGalleryRecords(items: GalleryItemRecord[]) {
     }
   });
 
-  return Array.from(projects.values())
+  return sortGalleryProjects(
+    Array.from(projects.values())
     .map((project) => {
       const sortedImages = [...project.images].sort((left, right) => {
         if (left.position !== right.position) {
@@ -136,8 +163,8 @@ function groupGalleryRecords(items: GalleryItemRecord[]) {
         image_paths: sortedImages.flatMap((image) => (image.path ? [image.path] : [])),
         images: sortedImages,
       };
-    })
-    .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
+    }),
+  );
 }
 
 export async function getGalleryItemsFromCms(): Promise<GalleryItem[]> {
