@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  deleteGalleryItem,
-  toggleGalleryPublished,
-} from "@/app/admin/actions";
+import { deleteGalleryItem, toggleGalleryPublished } from "@/app/admin/actions";
 import { galleryCategories } from "@/content/site-content";
 import {
+  buildGalleryProjectSlug,
   getTextValue,
   validateGalleryImage,
   GALLERY_BUCKET,
@@ -43,48 +41,21 @@ async function getAdminAuthHeaders() {
   };
 }
 
-function CreateGalleryForm() {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+async function uploadGalleryFiles({
+  files,
+  title,
+  category,
+  projectSlug,
+}: {
+  files: File[];
+  title: string;
+  category: string;
+  projectSlug: string;
+}) {
+  const { supabase, headers } = await getAdminAuthHeaders();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    setError("");
-    setSuccess("");
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const title = getTextValue(formData.get("title"));
-    const category = getTextValue(formData.get("category"));
-    const description = getTextValue(formData.get("description"));
-    const imageAlt = getTextValue(formData.get("imageAlt"));
-    const file = formData.get("image");
-
-    if (!category) {
-      setError("Choose a gallery category.");
-      setPending(false);
-      return;
-    }
-
-    if (!(file instanceof File)) {
-      setError("Choose an image to upload.");
-      setPending(false);
-      return;
-    }
-
-    const validationError = validateGalleryImage(file);
-    if (validationError) {
-      setError(validationError);
-      setPending(false);
-      return;
-    }
-
-    try {
-      const { supabase, headers } = await getAdminAuthHeaders();
-
+  const uploadResults = await Promise.all(
+    files.map(async (file) => {
       const uploadResponse = await fetch("/api/admin/gallery/upload", {
         method: "POST",
         headers,
@@ -92,6 +63,7 @@ function CreateGalleryForm() {
           title,
           category,
           fileName: file.name,
+          projectSlug,
         }),
       });
 
@@ -111,32 +83,97 @@ function CreateGalleryForm() {
         throw new Error(uploadError.message);
       }
 
+      return {
+        path: uploadPayload.path,
+        fileName: file.name,
+      };
+    }),
+  );
+
+  return {
+    headers,
+    uploads: uploadResults,
+  };
+}
+
+function CreateGalleryForm() {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError("");
+    setSuccess("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const title = getTextValue(formData.get("title"));
+    const category = getTextValue(formData.get("category"));
+    const description = getTextValue(formData.get("description"));
+    const imageAlt = getTextValue(formData.get("imageAlt"));
+    const files = formData
+      .getAll("images")
+      .filter((value): value is File => value instanceof File && value.size > 0);
+
+    if (!category) {
+      setError("Choose a gallery category.");
+      setPending(false);
+      return;
+    }
+
+    if (files.length === 0) {
+      setError("Choose at least one image to upload.");
+      setPending(false);
+      return;
+    }
+
+    const validationError = files.map((file) => validateGalleryImage(file)).find(Boolean);
+    if (validationError) {
+      setError(validationError);
+      setPending(false);
+      return;
+    }
+
+    const projectSlug = buildGalleryProjectSlug(title, category);
+
+    try {
+      const { headers, uploads } = await uploadGalleryFiles({
+        files,
+        title,
+        category,
+        projectSlug,
+      });
+
       const saveResponse = await fetch("/api/admin/gallery", {
         method: "POST",
         headers,
         body: JSON.stringify({
+          projectSlug,
           title,
           category,
           description,
           imageAlt,
-          imagePath: uploadPayload.path,
-          fileName: file.name,
+          imagePaths: uploads.map((upload) => upload.path),
+          fileNames: uploads.map((upload) => upload.fileName),
         }),
       });
 
       const savePayload = (await saveResponse.json()) as { error?: string; success?: string };
       if (!saveResponse.ok) {
-        throw new Error(savePayload.error || "Unable to save gallery item.");
+        throw new Error(savePayload.error || "Unable to save gallery project.");
       }
 
-      setSuccess(savePayload.success || "Gallery item saved.");
+      setSuccess(savePayload.success || "Gallery project saved.");
       form.reset();
       router.refresh();
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "Something went wrong while uploading the gallery image.",
+          : "Something went wrong while uploading the gallery project.",
       );
     } finally {
       setPending(false);
@@ -146,8 +183,8 @@ function CreateGalleryForm() {
   return (
     <form onSubmit={handleSubmit} className="admin-form">
       <label>
-        Title
-        <input type="text" name="title" placeholder="Optional" />
+        Project title
+        <input type="text" name="title" placeholder="Example: White Oak Twin Bed w/ Trundle" />
       </label>
 
       <label>
@@ -177,15 +214,15 @@ function CreateGalleryForm() {
       </label>
 
       <label>
-        Thumbnail image
-        <input type="file" name="image" accept="image/*" required />
+        Project images
+        <input type="file" name="images" accept="image/*" multiple required />
       </label>
 
-      <p>Upload JPG, PNG, or WebP images up to 10 MB.</p>
+      <p>Upload one or more JPG, PNG, or WebP images up to 10 MB each. The first image becomes the gallery tile cover.</p>
       {error ? <p className="form-error">{error}</p> : null}
       {success ? <p className="form-success">{success}</p> : null}
       <button type="submit" className="button button--primary" disabled={pending}>
-        {pending ? "Saving..." : "Save Gallery Item"}
+        {pending ? "Saving..." : "Save Gallery Project"}
       </button>
     </form>
   );
@@ -209,91 +246,55 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
     const category = getTextValue(formData.get("category"));
     const description = getTextValue(formData.get("description"));
     const imageAlt = getTextValue(formData.get("imageAlt"));
-    const currentImagePath = getTextValue(formData.get("currentImagePath"));
-    const file = formData.get("image");
+    const files = formData
+      .getAll("images")
+      .filter((value): value is File => value instanceof File && value.size > 0);
 
-    let imagePath = "";
-    let fileName = currentImagePath;
-
-      if (file instanceof File && file.size > 0) {
-      const validationError = validateGalleryImage(file);
-      if (validationError) {
-        setError(validationError);
-        setPending(false);
-        return;
-      }
-
-      try {
-        const { supabase, headers } = await getAdminAuthHeaders();
-
-        const uploadResponse = await fetch("/api/admin/gallery/upload", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            title,
-            category,
-            fileName: file.name,
-          }),
-        });
-
-        const uploadPayload = (await uploadResponse.json()) as { error?: string; path?: string; token?: string };
-        if (!uploadResponse.ok || !uploadPayload.path || !uploadPayload.token) {
-          throw new Error(uploadPayload.error || "Unable to prepare image upload.");
-        }
-
-        const { error: uploadError } = await supabase.storage
-          .from(GALLERY_BUCKET)
-          .uploadToSignedUrl(uploadPayload.path, uploadPayload.token, file, {
-            contentType: file.type || "application/octet-stream",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          throw new Error(uploadError.message);
-        }
-
-        imagePath = uploadPayload.path;
-        fileName = file.name;
-      } catch (submissionError) {
-        setError(
-          submissionError instanceof Error
-            ? submissionError.message
-            : "Something went wrong while uploading the gallery image.",
-        );
-        setPending(false);
-        return;
-      }
+    const validationError = files.map((file) => validateGalleryImage(file)).find(Boolean);
+    if (validationError) {
+      setError(validationError);
+      setPending(false);
+      return;
     }
 
     try {
-      const { headers } = await getAdminAuthHeaders();
+      const uploads =
+        files.length > 0
+          ? await uploadGalleryFiles({
+              files,
+              title,
+              category,
+              projectSlug: item.project_slug,
+            })
+          : await getAdminAuthHeaders().then(({ headers }) => ({ headers, uploads: [] }));
 
       const response = await fetch(`/api/admin/gallery/${item.id}`, {
         method: "PATCH",
-        headers,
+        headers: uploads.headers,
         body: JSON.stringify({
+          projectSlug: item.project_slug,
           title,
           category,
           description,
           imageAlt,
-          imagePath,
-          currentImagePath,
-          fileName,
+          imagePaths: uploads.uploads.map((upload) => upload.path),
+          fileNames: uploads.uploads.map((upload) => upload.fileName),
         }),
       });
 
       const payload = (await response.json()) as { error?: string; success?: string };
       if (!response.ok) {
-        throw new Error(payload.error || "Unable to update gallery item.");
+        throw new Error(payload.error || "Unable to update gallery project.");
       }
 
-      setSuccess(payload.success || "Gallery item updated.");
+      setSuccess(payload.success || "Gallery project updated.");
+      form.reset();
       router.refresh();
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "Something went wrong while updating the gallery item.",
+          : "Something went wrong while updating the gallery project.",
       );
     } finally {
       setPending(false);
@@ -302,11 +303,8 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
 
   return (
     <form onSubmit={handleSubmit} className="admin-form admin-form--compact">
-      <input type="hidden" name="id" value={item.id} />
-      <input type="hidden" name="currentImagePath" value={item.image_path || ""} />
-
       <label>
-        Title
+        Project title
         <input type="text" name="title" defaultValue={item.title} />
       </label>
 
@@ -334,9 +332,21 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
       </label>
 
       <label>
-        Replace image
-        <input type="file" name="image" accept="image/*" />
+        Add more project images
+        <input type="file" name="images" accept="image/*" multiple />
       </label>
+
+      <div className="gallery-admin-card__thumbs">
+        {item.images.map((image) => (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            key={image.id}
+            src={image.url}
+            alt={image.alt}
+            className="gallery-admin-card__thumb"
+          />
+        ))}
+      </div>
 
       {error ? <p className="form-error">{error}</p> : null}
       {success ? <p className="form-success">{success}</p> : null}
@@ -353,7 +363,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
       <div className="admin-panel">
         <div className="admin-panel__header">
           <p className="section-heading__eyebrow">Gallery manager</p>
-          <h2>Add a gallery item</h2>
+          <h2>Add a gallery project</h2>
         </div>
 
         <CreateGalleryForm />
@@ -362,17 +372,16 @@ export function GalleryManager({ items }: GalleryManagerProps) {
       <div className="admin-panel">
         <div className="admin-panel__header">
           <p className="section-heading__eyebrow">Current gallery</p>
-          <h2>Manage existing items</h2>
+          <h2>Manage existing projects</h2>
         </div>
 
         {items.length === 0 ? (
-          <p className="admin-empty-copy">No gallery items have been added yet.</p>
+          <p className="admin-empty-copy">No gallery projects have been added yet.</p>
         ) : (
           <div className="gallery-admin-list">
             {items.map((item) => (
-              <article key={item.id} className="gallery-admin-card">
+              <article key={item.project_slug} className="gallery-admin-card">
                 <div className="gallery-admin-card__media">
-                  {/* Admin previews use direct Supabase URLs, so a plain image keeps them reliable without extra remote config. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image_url}
@@ -388,26 +397,26 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                     <span className={item.published ? "status-pill status-pill--ready" : "status-pill"}>
                       {item.published ? "Published" : "Hidden"}
                     </span>
+                    <span>{item.image_count} photos</span>
                     <span>{new Date(item.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="gallery-admin-card__actions">
                     <form action={toggleGalleryPublished}>
-                      <input type="hidden" name="id" value={item.id} />
+                      <input type="hidden" name="projectSlug" value={item.project_slug} />
                       <input type="hidden" name="published" value={String(item.published)} />
                       <button type="submit" className="button button--secondary">
-                        {item.published ? "Hide Item" : "Publish Item"}
+                        {item.published ? "Hide Project" : "Publish Project"}
                       </button>
                     </form>
                     <form action={deleteGalleryItem}>
-                      <input type="hidden" name="id" value={item.id} />
-                      <input type="hidden" name="imagePath" value={item.image_path || ""} />
+                      <input type="hidden" name="projectSlug" value={item.project_slug} />
                       <button type="submit" className="button button--secondary">
-                        Delete Item
+                        Delete Project
                       </button>
                     </form>
                   </div>
                   <details className="gallery-admin-card__editor">
-                    <summary>Edit item</summary>
+                    <summary>Edit project</summary>
                     <GalleryEditForm item={item} />
                   </details>
                 </div>

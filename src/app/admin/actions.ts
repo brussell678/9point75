@@ -33,14 +33,14 @@ export async function toggleGalleryPublished(formData: FormData) {
     return;
   }
 
-  const id = getTextValue(formData, "id");
+  const projectSlug = getTextValue(formData, "projectSlug");
   const published = getTextValue(formData, "published") === "true";
 
-  if (!id) {
+  if (!projectSlug) {
     return;
   }
 
-  await supabase.from("gallery_items").update({ published: !published }).eq("id", id);
+  await supabase.from("gallery_items").update({ published: !published }).eq("project_slug", projectSlug);
 
   revalidatePath("/gallery");
   revalidatePath("/admin");
@@ -52,18 +52,26 @@ export async function deleteGalleryItem(formData: FormData) {
     return;
   }
 
-  const id = getTextValue(formData, "id");
-  const imagePath = getTextValue(formData, "imagePath");
+  const projectSlug = getTextValue(formData, "projectSlug");
 
-  if (!id) {
+  if (!projectSlug) {
     return;
   }
 
-  if (imagePath) {
-    await supabase.storage.from(GALLERY_BUCKET).remove([imagePath]);
+  const { data } = await supabase
+    .from("gallery_items")
+    .select("image_path")
+    .eq("project_slug", projectSlug)
+    .returns<Array<{ image_path: string | null }>>();
+
+  const imagePaths = (data || [])
+    .flatMap((item) => (item.image_path ? [item.image_path] : []));
+
+  if (imagePaths.length > 0) {
+    await supabase.storage.from(GALLERY_BUCKET).remove(imagePaths);
   }
 
-  await supabase.from("gallery_items").delete().eq("id", id);
+  await supabase.from("gallery_items").delete().eq("project_slug", projectSlug);
 
   revalidatePath("/gallery");
   revalidatePath("/admin");

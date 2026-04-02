@@ -13,6 +13,15 @@ export function getSafeBaseName(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+export function buildGalleryProjectKey(title: string, category: string) {
+  return getSafeBaseName(`${category}-${title || "project"}`) || "gallery-project";
+}
+
+export function buildGalleryProjectSlug(title: string, category: string) {
+  const base = buildGalleryProjectKey(title, category);
+  return `${base}-${Date.now().toString(36)}`;
+}
+
 export function validateGalleryImage(file: File) {
   if (file.size === 0) {
     return "Choose an image to upload.";
@@ -29,10 +38,21 @@ export function validateGalleryImage(file: File) {
   return null;
 }
 
-export function buildGalleryImagePath(fileName: string, title: string, category: string) {
+export function buildGalleryImagePath(
+  fileName: string,
+  title: string,
+  category: string,
+  projectSlug?: string,
+) {
   const safeBaseName = getSafeBaseName(title || fileName || category);
   const extension = fileName.includes(".") ? fileName.split(".").pop() : "jpg";
-  return `${Date.now()}-${safeBaseName || "gallery-item"}.${extension}`;
+  const imageName = `${Date.now()}-${safeBaseName || "gallery-item"}.${extension}`;
+
+  if (!projectSlug) {
+    return imageName;
+  }
+
+  return `${projectSlug}/${imageName}`;
 }
 
 export function buildGalleryValues({

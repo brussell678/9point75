@@ -23,17 +23,19 @@ export async function POST(request: Request) {
     title?: string;
     category?: string;
     fileName?: string;
+    projectSlug?: string;
   };
 
   const title = getTextValue(body.title ?? "");
   const category = getTextValue(body.category ?? "");
   const fileName = getTextValue(body.fileName ?? "");
+  const projectSlug = getTextValue(body.projectSlug ?? "");
 
   if (!category || !fileName) {
     return NextResponse.json({ error: "Missing upload details." }, { status: 400 });
   }
 
-  const path = buildGalleryImagePath(fileName, title, category);
+  const path = buildGalleryImagePath(fileName, title, category, projectSlug || undefined);
   const { data, error } = await adminSupabase.storage
     .from(GALLERY_BUCKET)
     .createSignedUploadUrl(path);

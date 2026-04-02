@@ -24,24 +24,26 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const { id } = await context.params;
   const body = (await request.json()) as {
+    projectSlug?: string;
     title?: string;
     category?: string;
     description?: string;
     imageAlt?: string;
-    imagePath?: string;
-    currentImagePath?: string;
-    fileName?: string;
+    imagePaths?: string[];
+    fileNames?: string[];
   };
 
+  const projectSlug = getTextValue(body.projectSlug ?? "");
   const title = getTextValue(body.title ?? "");
   const category = getTextValue(body.category ?? "");
   const description = getTextValue(body.description ?? "");
   const imageAlt = getTextValue(body.imageAlt ?? "");
-  const imagePath = getTextValue(body.imagePath ?? "");
-  const currentImagePath = getTextValue(body.currentImagePath ?? "");
-  const fileName = getTextValue(body.fileName ?? currentImagePath);
+  const imagePaths = Array.isArray(body.imagePaths)
+    ? body.imagePaths.map((path) => getTextValue(path)).filter(Boolean)
+    : [];
+  const fileName = Array.isArray(body.fileNames) ? getTextValue(body.fileNames[0] ?? "") : "";
 
-  if (!id || !category) {
+  if (!id || !projectSlug || !category) {
     return NextResponse.json({ error: "Gallery item information is incomplete." }, { status: 400 });
   }
 
@@ -50,10 +52,22 @@ export async function PATCH(request: Request, context: RouteContext) {
     category,
     description,
     imageAlt,
-    fileName,
+    fileName: fileName || title || category,
   });
 
-  const nextImagePath = imagePath || currentImagePath || null;
+  const { data: existingProject, error: existingProjectError } = await adminSupabase
+    .from("gallery_items")
+    .select("published, image_position")
+    .eq("project_slug", projectSlug)
+    .order("image_position", { ascending: false });
+
+  if (existingProjectError || !existingProject || existingProject.length === 0) {
+    if (imagePaths.length > 0) {
+      await adminSupabase.storage.from(GALLERY_BUCKET).remove(imagePaths);
+    }
+
+    return NextResponse.json({ error: "Gallery project could not be found." }, { status: 404 });
+  }
 
   const { error } = await adminSupabase
     .from("gallery_items")
@@ -62,24 +76,42 @@ export async function PATCH(request: Request, context: RouteContext) {
       category,
       description: finalDescription,
       image_alt: finalImageAlt,
-      image_path: nextImagePath,
     })
-    .eq("id", id);
+    .eq("project_slug", projectSlug);
 
   if (error) {
-    if (imagePath && imagePath !== currentImagePath) {
-      await adminSupabase.storage.from(GALLERY_BUCKET).remove([imagePath]);
+    if (imagePaths.length > 0) {
+      await adminSupabase.storage.from(GALLERY_BUCKET).remove(imagePaths);
     }
 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (imagePath && currentImagePath && imagePath !== currentImagePath) {
-    await adminSupabase.storage.from(GALLERY_BUCKET).remove([currentImagePath]);
+  if (imagePaths.length > 0) {
+    const nextImagePosition = (existingProject[0]?.image_position ?? -1) + 1;
+    const published = existingProject[0]?.published ?? true;
+
+    const { error: insertError } = await adminSupabase.from("gallery_items").insert(
+      imagePaths.map((imagePath, index) => ({
+        project_slug: projectSlug,
+        title: finalTitle,
+        category,
+        description: finalDescription,
+        image_path: imagePath,
+        image_position: nextImagePosition + index,
+        image_alt: finalImageAlt,
+        published,
+      })),
+    );
+
+    if (insertError) {
+      await adminSupabase.storage.from(GALLERY_BUCKET).remove(imagePaths);
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
   }
 
   revalidatePath("/gallery");
   revalidatePath("/admin");
 
-  return NextResponse.json({ success: "Gallery item updated.", adminEmail });
+  return NextResponse.json({ success: "Gallery project updated.", adminEmail });
 }

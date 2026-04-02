@@ -17,22 +17,26 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as {
+    projectSlug?: string;
     title?: string;
     category?: string;
     description?: string;
     imageAlt?: string;
-    imagePath?: string;
-    fileName?: string;
+    imagePaths?: string[];
+    fileNames?: string[];
   };
 
+  const projectSlug = getTextValue(body.projectSlug ?? "");
   const title = getTextValue(body.title ?? "");
   const category = getTextValue(body.category ?? "");
   const description = getTextValue(body.description ?? "");
   const imageAlt = getTextValue(body.imageAlt ?? "");
-  const imagePath = getTextValue(body.imagePath ?? "");
-  const fileName = getTextValue(body.fileName ?? "");
+  const imagePaths = Array.isArray(body.imagePaths)
+    ? body.imagePaths.map((path) => getTextValue(path)).filter(Boolean)
+    : [];
+  const fileName = Array.isArray(body.fileNames) ? getTextValue(body.fileNames[0] ?? "") : "";
 
-  if (!category || !imagePath || !fileName) {
+  if (!projectSlug || !category || imagePaths.length === 0 || !fileName) {
     return NextResponse.json({ error: "Gallery item information is incomplete." }, { status: 400 });
   }
 
@@ -44,17 +48,21 @@ export async function POST(request: Request) {
     fileName,
   });
 
-  const { error } = await adminSupabase.from("gallery_items").insert({
-    title: finalTitle,
-    category,
-    description: finalDescription,
-    image_path: imagePath,
-    image_alt: finalImageAlt,
-    published: true,
-  });
+  const { error } = await adminSupabase.from("gallery_items").insert(
+    imagePaths.map((imagePath, index) => ({
+      project_slug: projectSlug,
+      title: finalTitle,
+      category,
+      description: finalDescription,
+      image_path: imagePath,
+      image_position: index,
+      image_alt: finalImageAlt,
+      published: true,
+    })),
+  );
 
   if (error) {
-    await adminSupabase.storage.from(GALLERY_BUCKET).remove([imagePath]);
+    await adminSupabase.storage.from(GALLERY_BUCKET).remove(imagePaths);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -62,5 +70,5 @@ export async function POST(request: Request) {
   revalidatePath("/gallery");
   revalidatePath("/admin");
 
-  return NextResponse.json({ success: "Gallery item saved.", adminEmail });
+  return NextResponse.json({ success: "Gallery project saved.", adminEmail });
 }

@@ -533,6 +533,12 @@ select {
   padding: 1.2rem;
 }
 
+.gallery-card__count,
+.gallery-modal__count {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 .gallery-modal {
   position: fixed;
   inset: 0;
@@ -561,6 +567,56 @@ select {
 
 .gallery-modal__image-wrap {
   aspect-ratio: 16 / 10;
+}
+
+.gallery-modal__nav,
+.gallery-modal__thumbs,
+.gallery-admin-card__thumbs {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.gallery-modal__nav {
+  position: absolute;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gallery-modal__count {
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.92);
+  border: 1px solid var(--line);
+}
+
+.gallery-modal__thumbs,
+.gallery-admin-card__thumbs {
+  flex-wrap: wrap;
+}
+
+.gallery-modal__thumb,
+.gallery-admin-card__thumb {
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 250, 243, 0.82);
+}
+
+.gallery-modal__thumb {
+  padding: 0;
+}
+
+.gallery-modal__thumb--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(124, 76, 44, 0.18);
+}
+
+.gallery-admin-card__thumb {
+  object-fit: cover;
 }
 
 .quote-form {

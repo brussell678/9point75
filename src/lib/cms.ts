@@ -5,6 +5,7 @@ import {
   type GalleryItem,
   type GalleryCategory,
 } from "@/content/site-content";
+import { buildGalleryProjectKey } from "@/lib/gallery-admin";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 type SiteContentRecord = {
@@ -16,17 +17,39 @@ type SiteContentRecord = {
 
 type GalleryItemRecord = {
   id: string;
+  project_slug: string | null;
   title: string;
   category: Exclude<GalleryCategory, "All">;
   description: string;
   image_path: string | null;
+  image_position: number;
   image_alt: string;
   published: boolean;
   created_at: string;
 };
 
-export type GalleryAdminItem = GalleryItemRecord & {
+type GalleryProjectImage = {
+  id: string;
+  path: string | null;
+  url: string;
+  alt: string;
+  position: number;
+  created_at: string;
+};
+
+export type GalleryAdminItem = {
+  id: string;
+  project_slug: string;
+  title: string;
+  category: Exclude<GalleryCategory, "All">;
+  description: string;
+  published: boolean;
+  created_at: string;
   image_url: string;
+  image_alt: string;
+  image_count: number;
+  image_paths: string[];
+  images: GalleryProjectImage[];
 };
 
 const GALLERY_BUCKET = "gallery-images";
@@ -43,6 +66,78 @@ function getPublicGalleryUrl(path: string | null) {
 
   const { data } = supabase.storage.from(GALLERY_BUCKET).getPublicUrl(path);
   return data.publicUrl || "/placeholders/gallery.svg";
+}
+
+function getProjectSlug(item: GalleryItemRecord) {
+  return item.project_slug || buildGalleryProjectKey(item.title, item.category);
+}
+
+function groupGalleryRecords(items: GalleryItemRecord[]) {
+  const projects = new Map<string, GalleryAdminItem>();
+
+  items.forEach((item) => {
+    const projectSlug = getProjectSlug(item);
+    const imageUrl = getPublicGalleryUrl(item.image_path);
+    const image: GalleryProjectImage = {
+      id: item.id,
+      path: item.image_path,
+      url: imageUrl,
+      alt: item.image_alt,
+      position: item.image_position ?? 0,
+      created_at: item.created_at,
+    };
+
+    const existing = projects.get(projectSlug);
+    if (!existing) {
+      projects.set(projectSlug, {
+        id: item.id,
+        project_slug: projectSlug,
+        title: item.title,
+        category: item.category,
+        description: item.description,
+        published: item.published,
+        created_at: item.created_at,
+        image_url: imageUrl,
+        image_alt: item.image_alt,
+        image_count: 1,
+        image_paths: item.image_path ? [item.image_path] : [],
+        images: [image],
+      });
+      return;
+    }
+
+    existing.images.push(image);
+    existing.image_count += 1;
+    if (item.image_path) {
+      existing.image_paths.push(item.image_path);
+    }
+
+    if (new Date(item.created_at).getTime() > new Date(existing.created_at).getTime()) {
+      existing.created_at = item.created_at;
+    }
+  });
+
+  return Array.from(projects.values())
+    .map((project) => {
+      const sortedImages = [...project.images].sort((left, right) => {
+        if (left.position !== right.position) {
+          return left.position - right.position;
+        }
+
+        return new Date(left.created_at).getTime() - new Date(right.created_at).getTime();
+      });
+
+      const coverImage = sortedImages[0];
+
+      return {
+        ...project,
+        image_url: coverImage?.url || "/placeholders/gallery.svg",
+        image_alt: coverImage?.alt || project.title,
+        image_paths: sortedImages.flatMap((image) => (image.path ? [image.path] : [])),
+        images: sortedImages,
+      };
+    })
+    .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
 }
 
 export async function getGalleryItemsFromCms(): Promise<GalleryItem[]> {
@@ -63,31 +158,19 @@ export async function getGalleryItemsFromCms(): Promise<GalleryItem[]> {
     return galleryItems;
   }
 
-  const uniqueItems = data.filter((item, index, collection) => {
-    const signature = [item.title, item.category, item.description, item.image_path].join("::");
+  const groupedItems = groupGalleryRecords(data);
 
-    return (
-      index ===
-      collection.findIndex((candidate) => {
-        const candidateSignature = [
-          candidate.title,
-          candidate.category,
-          candidate.description,
-          candidate.image_path,
-        ].join("::");
-
-        return candidateSignature === signature;
-      })
-    );
-  });
-
-  return uniqueItems.map((item, index) => ({
-    id: index + 1,
+  return groupedItems.map((item) => ({
+    id: item.project_slug,
     title: item.title,
     category: item.category,
     description: item.description,
-    image: getPublicGalleryUrl(item.image_path),
+    image: item.image_url,
     alt: item.image_alt,
+    images: item.images.map((image) => ({
+      src: image.url,
+      alt: image.alt,
+    })),
   }));
 }
 
@@ -215,8 +298,5 @@ export async function getGalleryAdminItems(): Promise<GalleryAdminItem[]> {
     return [];
   }
 
-  return data.map((item) => ({
-    ...item,
-    image_url: getPublicGalleryUrl(item.image_path),
-  }));
+  return groupGalleryRecords(data);
 }

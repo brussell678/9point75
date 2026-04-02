@@ -21,15 +21,43 @@ alter table public.quote_requests enable row level security;
 create table if not exists public.gallery_items (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
+  project_slug text,
   title text not null,
   category text not null,
   description text not null,
   image_path text,
+  image_position integer not null default 0,
   image_alt text not null,
   published boolean not null default true
 );
 
 alter table public.gallery_items enable row level security;
+
+alter table public.gallery_items add column if not exists project_slug text;
+alter table public.gallery_items add column if not exists image_position integer not null default 0;
+
+update public.gallery_items
+set project_slug = trim(
+  both '-'
+  from regexp_replace(lower(category || '-' || title), '[^a-z0-9]+', '-', 'g')
+)
+where coalesce(project_slug, '') = '';
+
+with numbered_gallery_items as (
+  select
+    id,
+    row_number() over (
+      partition by coalesce(project_slug, trim(both '-' from regexp_replace(lower(category || '-' || title), '[^a-z0-9]+', '-', 'g')))
+      order by image_position asc, created_at asc, id asc
+    ) - 1 as next_position
+  from public.gallery_items
+)
+update public.gallery_items as gallery_items
+set image_position = numbered_gallery_items.next_position
+from numbered_gallery_items
+where gallery_items.id = numbered_gallery_items.id;
+
+create index if not exists gallery_items_project_slug_idx on public.gallery_items (project_slug);
 
 create table if not exists public.site_content (
   section_key text primary key,
