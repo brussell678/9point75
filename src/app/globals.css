@@ -546,11 +546,15 @@ select {
   display: grid;
   place-items: center;
   padding: 1rem;
+  overflow-y: auto;
   background: rgba(29, 23, 18, 0.72);
 }
 
 .gallery-modal__panel {
   width: min(960px, 100%);
+  max-height: calc(100vh - 2rem);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   border-radius: 1.5rem;
   overflow: hidden;
   background: var(--surface-strong);
@@ -563,10 +567,24 @@ select {
   border-bottom: 1px solid var(--line);
   background: transparent;
   text-align: right;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .gallery-modal__image-wrap {
-  aspect-ratio: 16 / 10;
+  min-height: 0;
+  max-height: min(62vh, 720px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gallery-modal__image-wrap .gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .gallery-modal__nav,
@@ -594,6 +612,10 @@ select {
 .gallery-modal__thumbs,
 .gallery-admin-card__thumbs {
   flex-wrap: wrap;
+}
+
+.gallery-modal__content {
+  overflow-y: auto;
 }
 
 .gallery-modal__thumb,
@@ -1200,5 +1222,17 @@ select {
   .gallery-card__body,
   .gallery-modal__content {
     padding: 1rem;
+  }
+
+  .gallery-modal {
+    padding: 0.75rem;
+  }
+
+  .gallery-modal__panel {
+    max-height: calc(100vh - 1.5rem);
+  }
+
+  .gallery-modal__image-wrap {
+    max-height: 50vh;
   }
 }
