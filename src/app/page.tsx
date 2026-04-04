@@ -3,12 +3,21 @@ import Link from "next/link";
 import { AdminPreview } from "@/components/admin-preview";
 import { SectionHeading } from "@/components/section-heading";
 import { getHeroContentFromCms } from "@/lib/cms";
+import { buildPageMetadata, serviceAreaLabel, servicePageLinks } from "@/lib/seo";
 import {
   materials,
   processSteps,
   trustPoints,
   valueProps,
 } from "@/content/site-content";
+
+export const metadata = buildPageMetadata({
+  title: "Custom Woodworking Jacksonville NC",
+  description:
+    "Custom cabinetry, built-ins, furniture, shadowboxes, and specialty woodworking in Jacksonville, North Carolina. Request a quote from 9point75 Woodworks.",
+  path: "/",
+  keywords: ["custom woodworking Jacksonville NC", "custom furniture North Carolina", "built-ins North Carolina"],
+});
 
 export default async function Home() {
   const heroContent = await getHeroContentFromCms();
@@ -59,6 +68,7 @@ export default async function Home() {
             <SectionHeading
               eyebrow="Why clients hire 9point75"
               title="A custom process that stays personal without feeling informal."
+              description="From Jacksonville, North Carolina to surrounding communities across Northeastern North Carolina, each project is built around practical use, honest communication, and a handcrafted result that lasts."
             />
           </div>
           <div className="feature-image-card feature-image-card--value">
@@ -80,6 +90,31 @@ export default async function Home() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="section section--contrast">
+        <div className="shell split-layout">
+          <article className="trust-card">
+            <p className="section-heading__eyebrow">Service area</p>
+            <h2>Custom woodworking for Jacksonville, North Carolina and surrounding areas.</h2>
+            <p>{serviceAreaLabel}</p>
+            <p className="contact-note">
+              Clients reach out for custom furniture in North Carolina, custom cabinets in NC, and built-ins in North Carolina that feel tailored to the room instead of forced into it.
+            </p>
+          </article>
+          <article className="trust-card">
+            <p className="section-heading__eyebrow">Explore services</p>
+            <div className="footer-links">
+              {servicePageLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  {link.label} in North Carolina
+                </Link>
+              ))}
+              <Link href="/gallery">View recent project photos</Link>
+              <Link href="/contact">Request a quote</Link>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -131,12 +166,12 @@ export default async function Home() {
 
           <div className="materials-side">
             <div className="feature-image-card feature-image-card--materials">
-              <Image
-                src="/home/975-image-2.jpg"
-                alt="Wood species and craftsmanship detail from 9point75 Woodworks"
-                width={1400}
-                height={1000}
-                className="feature-image"
+            <Image
+              src="/home/975-image-2.jpg"
+              alt="Custom woodworking materials and craftsmanship detail in North Carolina"
+              width={1400}
+              height={1000}
+              className="feature-image"
               />
             </div>
 
@@ -159,6 +194,9 @@ export default async function Home() {
           <div>
             <p className="section-heading__eyebrow">Ready to talk through a project?</p>
             <h2>Bring the measurements, rough ideas, or inspiration images. We can shape the rest together.</h2>
+            <p className="contact-note">
+              Whether you need custom furniture, custom cabinets, or built-ins in North Carolina, the quote process is designed to be clear and low-pressure.
+            </p>
           </div>
           <Link href="/contact" className="button button--primary">
             Start a Quote Request

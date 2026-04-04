@@ -3,10 +3,15 @@ import type { Metadata } from "next";
 import { SectionHeading } from "@/components/section-heading";
 import { materials, trustPoints } from "@/content/site-content";
 import { getAboutContentFromCms } from "@/lib/cms";
+import { buildPageMetadata, serviceAreaLabel } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "About",
-};
+  description:
+    "Learn about 9point75 Woodworks, a veteran-owned woodworking shop serving Jacksonville, North Carolina with custom cabinetry, furniture, and built-ins.",
+  path: "/about",
+  keywords: ["veteran owned woodworking North Carolina", "Jacksonville NC woodworker"],
+});
 
 export default async function AboutPage() {
   const aboutSections = await getAboutContentFromCms();
@@ -56,6 +61,7 @@ export default async function AboutPage() {
                 <li key={point}>{point}</li>
               ))}
             </ul>
+            <p className="contact-note">{serviceAreaLabel}</p>
           </article>
 
           <article className="trust-card">

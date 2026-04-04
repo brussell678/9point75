@@ -1038,6 +1038,12 @@ select {
   color: var(--muted);
 }
 
+.service-area-copy {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 1.02rem;
+}
+
 @media (max-width: 960px) {
   .hero__grid,
   .split-layout,

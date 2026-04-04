@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { contactDetails, navigationLinks, socialLinks } from "@/content/site-content";
+import { serviceAreaLabel, servicePageLinks } from "@/lib/seo";
 
 function SocialIcon({ label }: { label: string }) {
   if (label === "Instagram") {
@@ -41,6 +42,7 @@ export function SiteFooter() {
               <p className="footer-copy">
                 Custom cabinetry, furniture, and specialty builds with a calm, client-first process.
               </p>
+              <p className="footer-copy">{serviceAreaLabel}</p>
             </div>
           </div>
         </div>
@@ -53,6 +55,18 @@ export function SiteFooter() {
                 {link.label}
               </Link>
             ))}
+          </div>
+        </div>
+
+        <div className="footer-block">
+          <p className="footer-eyebrow">Services</p>
+          <div className="footer-links">
+            {servicePageLinks.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label} in North Carolina
+              </Link>
+            ))}
+            <Link href="/contact">Request a Quote</Link>
           </div>
         </div>
 

@@ -3,10 +3,15 @@ import { QuoteForm } from "@/components/quote-form";
 import { SectionHeading } from "@/components/section-heading";
 import { contactDetails } from "@/content/site-content";
 import { getMissingEnvVars } from "@/lib/env";
+import { buildPageMetadata, serviceAreaLabel } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Contact",
-};
+  description:
+    "Request a quote for custom furniture, custom cabinets, and built-ins in Jacksonville, North Carolina and surrounding areas.",
+  path: "/contact",
+  keywords: ["request woodworking quote North Carolina", "custom cabinets Jacksonville NC"],
+});
 
 type ContactPageProps = {
   searchParams?: Promise<{ submitted?: string }>;
@@ -63,6 +68,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               <span>{contactDetails.location}</span>
               <span>{contactDetails.availability}</span>
             </div>
+            <p className="contact-note">{serviceAreaLabel}</p>
             <p className="contact-note">
               The quote process is designed to start with enough information to guide the first conversation,
               not force every decision upfront.
