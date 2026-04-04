@@ -1007,7 +1007,7 @@ select {
 }
 
 .site-footer__grid {
-  grid-template-columns: 1.4fr repeat(3, 1fr);
+  grid-template-columns: 1.4fr repeat(4, 1fr);
   align-items: start;
 }
 
