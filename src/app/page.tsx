@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AdminPreview } from "@/components/admin-preview";
 import { SectionHeading } from "@/components/section-heading";
 import { getHeroContentFromCms } from "@/lib/cms";
 import { buildPageMetadata, serviceAreaLabel, servicePageLinks } from "@/lib/seo";
@@ -186,8 +185,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      <AdminPreview />
 
       <section className="section section--compact">
         <div className="shell cta-banner">

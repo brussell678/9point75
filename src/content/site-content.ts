@@ -2,6 +2,7 @@ export const navigationLinks = [
   { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
   { href: "/about", label: "About" },
+  { href: "/admin", label: "Admin Portal" },
 ];
 
 export const socialLinks = [
