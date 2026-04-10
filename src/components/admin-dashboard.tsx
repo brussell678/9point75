@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { updateLeadStatus } from "@/app/admin/actions";
+import { deleteLead, updateLeadStatus } from "@/app/admin/actions";
 import {
   quoteStatusLabels,
   type AdminQuoteRequestRecord,
@@ -134,6 +134,12 @@ export function AdminDashboard({ leads, attachmentsEnabled }: AdminDashboardProp
             <a className="button button--secondary" href={`mailto:${lead.email}`}>
               Reply by Email
             </a>
+            <form action={deleteLead}>
+              <input type="hidden" name="id" value={lead.id} />
+              <button type="submit" className="button button--secondary button--danger">
+                Delete Request
+              </button>
+            </form>
           </div>
         </article>
       ))}

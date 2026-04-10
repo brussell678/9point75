@@ -796,6 +796,15 @@ select {
   white-space: nowrap;
 }
 
+.button--danger {
+  color: #8a2f2f;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .admin-route--stacked {
   margin-top: 1rem;
 }

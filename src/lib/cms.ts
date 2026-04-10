@@ -24,6 +24,7 @@ type GalleryItemRecord = {
   description: string;
   image_path: string | null;
   image_position: number;
+  project_position: number;
   image_alt: string;
   published: boolean;
   created_at: string;
@@ -46,6 +47,7 @@ export type GalleryAdminItem = {
   description: string;
   published: boolean;
   created_at: string;
+  project_position: number;
   image_url: string;
   image_alt: string;
   image_count: number;
@@ -76,10 +78,24 @@ function getProjectSlug(item: GalleryItemRecord) {
   return item.project_slug || buildGalleryProjectKey(item.title, item.category);
 }
 
-function sortGalleryProjects<T extends { category: Exclude<GalleryCategory, "All">; created_at?: string; title: string }>(
+function sortGalleryProjects<
+  T extends {
+    category: Exclude<GalleryCategory, "All">;
+    created_at?: string;
+    project_position?: number;
+    title: string;
+  },
+>(
   items: T[],
 ) {
   return [...items].sort((left, right) => {
+    const leftProjectPosition = left.project_position ?? 0;
+    const rightProjectPosition = right.project_position ?? 0;
+
+    if (leftProjectPosition !== rightProjectPosition) {
+      return leftProjectPosition - rightProjectPosition;
+    }
+
     const leftCategoryIndex = orderedGalleryCategories.indexOf(left.category);
     const rightCategoryIndex = orderedGalleryCategories.indexOf(right.category);
 
@@ -123,6 +139,7 @@ function groupGalleryRecords(items: GalleryItemRecord[]) {
         description: item.description,
         published: item.published,
         created_at: item.created_at,
+        project_position: item.project_position ?? 0,
         image_url: imageUrl,
         image_alt: item.image_alt,
         image_count: 1,

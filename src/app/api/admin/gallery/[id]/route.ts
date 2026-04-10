@@ -57,7 +57,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const { data: existingProject, error: existingProjectError } = await adminSupabase
     .from("gallery_items")
-    .select("published, image_position")
+    .select("published, image_position, project_position")
     .eq("project_slug", projectSlug)
     .order("image_position", { ascending: false });
 
@@ -89,6 +89,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   if (imagePaths.length > 0) {
     const nextImagePosition = (existingProject[0]?.image_position ?? -1) + 1;
+    const projectPosition = existingProject[0]?.project_position ?? 0;
     const published = existingProject[0]?.published ?? true;
 
     const { error: insertError } = await adminSupabase.from("gallery_items").insert(
@@ -99,6 +100,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         description: finalDescription,
         image_path: imagePath,
         image_position: nextImagePosition + index,
+        project_position: projectPosition,
         image_alt: finalImageAlt,
         published,
       })),

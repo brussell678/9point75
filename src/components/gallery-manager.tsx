@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteGalleryItem, toggleGalleryPublished } from "@/app/admin/actions";
+import { deleteGalleryItem, moveGalleryItem, toggleGalleryPublished } from "@/app/admin/actions";
 import { galleryCategories } from "@/content/site-content";
 import {
   buildGalleryProjectSlug,
@@ -379,7 +379,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
           <p className="admin-empty-copy">No gallery projects have been added yet.</p>
         ) : (
           <div className="gallery-admin-list">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <article key={item.project_slug} className="gallery-admin-card">
                 <div className="gallery-admin-card__media">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -397,10 +397,25 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                     <span className={item.published ? "status-pill status-pill--ready" : "status-pill"}>
                       {item.published ? "Published" : "Hidden"}
                     </span>
+                    <span>Gallery position {index + 1}</span>
                     <span>{item.image_count} photos</span>
                     <span>{new Date(item.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="gallery-admin-card__actions">
+                    <form action={moveGalleryItem}>
+                      <input type="hidden" name="projectSlug" value={item.project_slug} />
+                      <input type="hidden" name="direction" value="up" />
+                      <button type="submit" className="button button--secondary" disabled={index === 0}>
+                        Move Up
+                      </button>
+                    </form>
+                    <form action={moveGalleryItem}>
+                      <input type="hidden" name="projectSlug" value={item.project_slug} />
+                      <input type="hidden" name="direction" value="down" />
+                      <button type="submit" className="button button--secondary" disabled={index === items.length - 1}>
+                        Move Down
+                      </button>
+                    </form>
                     <form action={toggleGalleryPublished}>
                       <input type="hidden" name="projectSlug" value={item.project_slug} />
                       <input type="hidden" name="published" value={String(item.published)} />

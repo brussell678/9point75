@@ -48,6 +48,14 @@ export async function POST(request: Request) {
     fileName,
   });
 
+  const { data: latestProject } = await adminSupabase
+    .from("gallery_items")
+    .select("project_position")
+    .order("project_position", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ project_position: number | null }>();
+  const projectPosition = (latestProject?.project_position ?? -1) + 1;
+
   const { error } = await adminSupabase.from("gallery_items").insert(
     imagePaths.map((imagePath, index) => ({
       project_slug: projectSlug,
@@ -56,6 +64,7 @@ export async function POST(request: Request) {
       description: finalDescription,
       image_path: imagePath,
       image_position: index,
+      project_position: projectPosition,
       image_alt: finalImageAlt,
       published: true,
     })),

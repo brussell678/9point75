@@ -27,6 +27,7 @@ create table if not exists public.gallery_items (
   description text not null,
   image_path text,
   image_position integer not null default 0,
+  project_position integer not null default 0,
   image_alt text not null,
   published boolean not null default true
 );
@@ -35,6 +36,7 @@ alter table public.gallery_items enable row level security;
 
 alter table public.gallery_items add column if not exists project_slug text;
 alter table public.gallery_items add column if not exists image_position integer not null default 0;
+alter table public.gallery_items add column if not exists project_position integer not null default 0;
 
 update public.gallery_items
 set project_slug = trim(
@@ -57,7 +59,24 @@ set image_position = numbered_gallery_items.next_position
 from numbered_gallery_items
 where gallery_items.id = numbered_gallery_items.id;
 
+with ordered_gallery_projects as (
+  select
+    project_slug,
+    row_number() over (
+      order by
+        min(created_at) desc,
+        min(title) asc
+    ) - 1 as next_position
+  from public.gallery_items
+  group by project_slug
+)
+update public.gallery_items as gallery_items
+set project_position = ordered_gallery_projects.next_position
+from ordered_gallery_projects
+where gallery_items.project_slug = ordered_gallery_projects.project_slug;
+
 create index if not exists gallery_items_project_slug_idx on public.gallery_items (project_slug);
+create index if not exists gallery_items_project_position_idx on public.gallery_items (project_position);
 
 create table if not exists public.site_content (
   section_key text primary key,
