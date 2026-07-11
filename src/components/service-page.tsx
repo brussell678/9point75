@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SectionHeading } from "@/components/section-heading";
+import { PageHero } from "@/components/page-hero";
 import { serviceAreaLabel, servicePageLinks } from "@/lib/seo";
 
 type ServiceBenefit = {
@@ -37,19 +37,37 @@ export function ServicePage({
 
   return (
     <>
-      <section className="page-hero">
-        <div className="shell process-section">
-          <div>
-            <SectionHeading eyebrow={eyebrow} title={title} description={description} />
-            <p className="service-area-copy">{serviceAreaLabel}</p>
-          </div>
+      <PageHero eyebrow={eyebrow} title={title} description={description}>
+        <p className="page-hero__area">{serviceAreaLabel}</p>
+      </PageHero>
+
+      <section className="section">
+        <div className="shell split-layout">
           <div className="feature-image-card feature-image-card--gallery">
             <Image src={imageSrc} alt={imageAlt} width={1400} height={1000} className="feature-image" />
           </div>
+          <article className="story-card">
+            <h2>How the process works</h2>
+            <ul className="check-list">
+              {processSummary.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ul>
+            <p className="section-heading__eyebrow section-heading__eyebrow--spaced">
+              Materials and finishes
+            </p>
+            <div className="tag-row">
+              {materials.map((material) => (
+                <span key={material} className="tag">
+                  {material}
+                </span>
+              ))}
+            </div>
+          </article>
         </div>
       </section>
 
-      <section className="section section--compact">
+      <section className="section section--contrast">
         <div className="shell cards-grid">
           {benefits.map((benefit) => (
             <article key={benefit.title} className="info-card">
@@ -60,37 +78,12 @@ export function ServicePage({
         </div>
       </section>
 
-      <section className="section section--contrast">
-        <div className="shell split-layout">
-          <article className="story-card">
-            <h2>How the process works</h2>
-            <ul className="check-list">
-              {processSummary.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ul>
-          </article>
-          <article className="trust-card">
-            <p className="section-heading__eyebrow">Materials and finishes</p>
-            <div className="tag-row">
-              {materials.map((material) => (
-                <span key={material} className="tag">
-                  {material}
-                </span>
-              ))}
-            </div>
-            <p className="contact-note">
-              Each project is built to suit the room, the use case, and the level of finish the client wants.
-            </p>
-          </article>
-        </div>
-      </section>
-
       <section className="section">
         <div className="shell cta-banner">
           <div>
-            <p className="section-heading__eyebrow">Request a quote</p>
-            <h2>{ctaCopy}</h2>
+            <p className="section-heading__eyebrow">Start the conversation</p>
+            <h2>Ready when you are.</h2>
+            <p className="contact-note">{ctaCopy}</p>
           </div>
           <div className="button-row">
             <Link href="/contact" className="button button--primary">
@@ -121,6 +114,13 @@ export function ServicePage({
               </span>
             </Link>
           ))}
+          <Link href="/about" className="info-card info-card--linked">
+            <p className="section-heading__eyebrow">The shop</p>
+            <h3>Meet the maker</h3>
+            <span className="info-card__arrow" aria-hidden="true">
+              About →
+            </span>
+          </Link>
         </div>
       </section>
     </>

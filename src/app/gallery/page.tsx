@@ -1,10 +1,9 @@
-import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GalleryBrowser } from "@/components/gallery-browser";
-import { SectionHeading } from "@/components/section-heading";
+import { PageHero } from "@/components/page-hero";
 import { getGalleryItemsFromCms } from "@/lib/cms";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, servicePageLinks } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Gallery",
@@ -19,50 +18,48 @@ export default async function GalleryPage() {
 
   return (
     <>
-      <section className="page-hero">
-        <div className="shell process-section">
-          <div>
-            <SectionHeading
-              eyebrow="Gallery"
-              title="A closer look at custom work shaped by detail, durability, and the way each piece is meant to live in a space."
-              description="Browse recent categories, open images for a fuller view, and check back as new projects are added over time."
-            />
-          </div>
-          <div className="feature-image-card feature-image-card--gallery">
-            <Image
-              src="/home/975-image-5.jpg"
-              alt="Gallery preview image from 9point75 Woodworks"
-              width={1400}
-              height={1000}
-              className="feature-image"
-            />
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="The portfolio"
+        title="The work speaks. Here's the proof."
+        description="Built-ins, furniture, shadowboxes, and one-off pieces — each one shaped by a real conversation with a real client. Filter by category and tap any project for a closer look."
+      />
 
-      <section className="section section--compact">
+      <section className="section">
         <div className="shell">
           <GalleryBrowser items={galleryItems} />
         </div>
       </section>
 
       <section className="section section--compact">
-        <div className="shell split-layout">
-          <article className="trust-card">
-            <p className="section-heading__eyebrow">Looking for something similar?</p>
-            <div className="footer-links">
-              <Link href="/custom-furniture-north-carolina">Custom furniture in North Carolina</Link>
-              <Link href="/custom-cabinets-north-carolina">Custom cabinets in North Carolina</Link>
-              <Link href="/built-ins-north-carolina">Built-ins in North Carolina</Link>
-            </div>
-          </article>
-          <article className="trust-card">
-            <p className="section-heading__eyebrow">Start a project</p>
-            <p>When you see a style or level of finish you like, the next step is a straightforward quote request.</p>
-            <Link href="/contact" className="button button--primary">
-              Request a Quote
+        <div className="shell link-grid">
+          {servicePageLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="info-card info-card--linked">
+              <p className="section-heading__eyebrow">Service</p>
+              <h3>{link.label} in North Carolina</h3>
+              <span className="info-card__arrow" aria-hidden="true">
+                Explore →
+              </span>
             </Link>
-          </article>
+          ))}
+          <Link href="/contact" className="info-card info-card--linked">
+            <p className="section-heading__eyebrow">Start a project</p>
+            <h3>Saw a level of finish you like?</h3>
+            <span className="info-card__arrow" aria-hidden="true">
+              Request a quote →
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="shell cta-banner">
+          <div>
+            <p className="section-heading__eyebrow">Your project could be next</p>
+            <h2>Every piece here started with a rough idea and a conversation.</h2>
+          </div>
+          <Link href="/contact" className="button button--primary">
+            Request a Quote
+          </Link>
         </div>
       </section>
     </>

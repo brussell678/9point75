@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { PageHero } from "@/components/page-hero";
 import { QuoteForm } from "@/components/quote-form";
-import { SectionHeading } from "@/components/section-heading";
 import { contactDetails } from "@/content/site-content";
 import { getMissingEnvVars } from "@/lib/env";
 import { buildPageMetadata, serviceAreaLabel } from "@/lib/seo";
@@ -24,17 +24,13 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
   return (
     <>
-      <section className="page-hero">
-        <div className="shell">
-          <SectionHeading
-            eyebrow="Request a quote"
-            title="Tell us about the project, the space, and how you want it to feel."
-            description="Only an email and a project description are required. Rough ideas, napkin sketches, and inspiration photos are all welcome — that's how most projects start."
-          />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Request a quote"
+        title="Tell us about the project, the space, and how you want it to feel."
+        description="Only an email and a project description are required. Rough ideas, napkin sketches, and inspiration photos are all welcome — that's how most projects start."
+      />
 
-      <section className="section section--compact">
+      <section className="section">
         <div className="shell split-layout split-layout--wide">
           <div className="contact-form-stack">
             {submitted ? (
@@ -70,7 +66,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             </div>
             <p className="contact-note">{serviceAreaLabel}</p>
 
-            <p className="section-heading__eyebrow" style={{ marginTop: "1.5rem" }}>
+            <p className="section-heading__eyebrow section-heading__eyebrow--spaced">
               What happens next
             </p>
             <ol className="next-steps">
@@ -78,6 +74,15 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               <li>You get a reply to talk through the piece, the space, and the budget.</li>
               <li>Design, wood, and finish get refined until the direction is right.</li>
             </ol>
+
+            <p className="section-heading__eyebrow section-heading__eyebrow--spaced">
+              Good to know
+            </p>
+            <p className="contact-note">
+              Every build is quoted individually — size, species, and finish all matter, so there&apos;s
+              no one-size price list. Sharing a budget range up front just helps the first
+              conversation start in the right place.
+            </p>
           </aside>
         </div>
       </section>

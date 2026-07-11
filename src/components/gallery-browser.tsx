@@ -129,7 +129,7 @@ export function GalleryBrowser({ items }: GalleryBrowserProps) {
       </div>
 
       {visibleItems.length === 0 ? (
-        <p className="admin-empty-copy">Nothing in this category yet — check back soon.</p>
+        <p className="gallery-empty">Nothing in this category yet — check back soon.</p>
       ) : null}
 
       <div className="gallery-grid">

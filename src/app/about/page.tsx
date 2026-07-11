@@ -1,8 +1,9 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHero } from "@/components/page-hero";
 import { SectionHeading } from "@/components/section-heading";
-import { makerPoints, materials, trustPoints } from "@/content/site-content";
+import { heroBadges, makerPoints, materials, trustPoints } from "@/content/site-content";
 import { getAboutContentFromCms } from "@/lib/cms";
 import { buildPageMetadata, serviceAreaLabel } from "@/lib/seo";
 
@@ -19,13 +20,27 @@ export default async function AboutPage() {
 
   return (
     <>
-      <section className="page-hero">
+      <PageHero
+        eyebrow="About the shop"
+        title="Craftsmanship without compromise, built on Marine Corps attention to detail."
+        description={aboutSections.intro}
+      >
+        <div className="page-hero__meta">
+          {heroBadges.map((badge) => (
+            <span key={badge} className="hero__badge">
+              {badge}
+            </span>
+          ))}
+        </div>
+      </PageHero>
+
+      <section className="section">
         <div className="shell process-section">
           <div>
             <SectionHeading
-              eyebrow="About the shop"
-              title="Craftsmanship without compromise, built on Marine Corps attention to detail."
-              description={aboutSections.intro}
+              eyebrow="The maker"
+              title="One craftsman. One standard."
+              description="No production line, no subcontractors — the person you talk to on day one is the same person sanding the final coat."
             />
           </div>
           <div className="feature-image-card feature-image-card--about">
@@ -38,9 +53,6 @@ export default async function AboutPage() {
             />
           </div>
         </div>
-      </section>
-
-      <section className="section section--compact">
         <div className="shell cards-grid">
           {makerPoints.map((point) => (
             <article key={point.title} className="info-card">
@@ -51,7 +63,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section--contrast">
         <div className="shell split-layout">
           <article className="story-card">
             <h2>The story</h2>
@@ -64,7 +76,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="section section--contrast">
+      <section className="section">
         <div className="shell split-layout">
           <article className="trust-card">
             <p className="section-heading__eyebrow">What clients can expect</p>
