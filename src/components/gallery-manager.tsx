@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteGalleryItem, moveGalleryItem, toggleGalleryPublished } from "@/app/admin/actions";
+import { ConfirmButton } from "@/components/confirm-button";
 import { galleryCategories } from "@/content/site-content";
 import {
   buildGalleryProjectSlug,
@@ -183,12 +184,12 @@ function CreateGalleryForm() {
   return (
     <form onSubmit={handleSubmit} className="admin-form">
       <label>
-        Project title
+        1. Give the project a name
         <input type="text" name="title" placeholder="Example: White Oak Twin Bed w/ Trundle" />
       </label>
 
       <label>
-        Category
+        2. Pick a category
         <select name="category" defaultValue="" required>
           <option value="" disabled>
             Select a category
@@ -204,25 +205,32 @@ function CreateGalleryForm() {
       </label>
 
       <label>
-        Description
-        <textarea name="description" rows={4} placeholder="Optional" />
+        3. Say a few words about it <span className="field-hint">(optional)</span>
+        <textarea
+          name="description"
+          rows={4}
+          placeholder="The wood, the finish, what made this one interesting..."
+        />
       </label>
 
       <label>
-        Image alt text
-        <input type="text" name="imageAlt" placeholder="Optional" />
-      </label>
-
-      <label>
-        Project images
+        4. Choose the photos
         <input type="file" name="images" accept="image/*" multiple required />
       </label>
 
-      <p>Upload one or more JPG, PNG, or WebP images up to 10 MB each. The first image becomes the gallery tile cover.</p>
+      <label>
+        Photo description for search engines <span className="field-hint">(optional — helps people find you on Google)</span>
+        <input type="text" name="imageAlt" placeholder="Example: walnut dining table with breadboard ends" />
+      </label>
+
+      <p>
+        JPG, PNG, or WebP photos up to 10 MB each. The first photo becomes the cover image visitors
+        see in the gallery.
+      </p>
       {error ? <p className="form-error">{error}</p> : null}
       {success ? <p className="form-success">{success}</p> : null}
       <button type="submit" className="button button--primary" disabled={pending}>
-        {pending ? "Saving..." : "Save Gallery Project"}
+        {pending ? "Uploading photos..." : "Add to Gallery"}
       </button>
     </form>
   );
@@ -362,8 +370,9 @@ export function GalleryManager({ items }: GalleryManagerProps) {
     <section className="admin-stack">
       <div className="admin-panel">
         <div className="admin-panel__header">
-          <p className="section-heading__eyebrow">Gallery manager</p>
-          <h2>Add a gallery project</h2>
+          <p className="section-heading__eyebrow">Show off the work</p>
+          <h2>Add a project to the gallery</h2>
+          <p>Four quick steps and it&apos;s live on the website.</p>
         </div>
 
         <CreateGalleryForm />
@@ -373,10 +382,17 @@ export function GalleryManager({ items }: GalleryManagerProps) {
         <div className="admin-panel__header">
           <p className="section-heading__eyebrow">Current gallery</p>
           <h2>Manage existing projects</h2>
+          <p>
+            Move Up / Move Down changes the order visitors see. Hide keeps a project without showing
+            it on the website.
+          </p>
         </div>
 
         {items.length === 0 ? (
-          <p className="admin-empty-copy">No gallery projects have been added yet.</p>
+          <p className="admin-empty-copy">
+            Nothing in the gallery yet — add your first project above and it will show up on the
+            website right away.
+          </p>
         ) : (
           <div className="gallery-admin-list">
             {items.map((item, index) => (
@@ -425,9 +441,12 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                     </form>
                     <form action={deleteGalleryItem}>
                       <input type="hidden" name="projectSlug" value={item.project_slug} />
-                      <button type="submit" className="button button--secondary">
+                      <ConfirmButton
+                        className="button button--danger"
+                        message={`Delete "${item.title}" and all of its photos? This can't be undone.`}
+                      >
                         Delete Project
-                      </button>
+                      </ConfirmButton>
                     </form>
                   </div>
                   <details className="gallery-admin-card__editor">

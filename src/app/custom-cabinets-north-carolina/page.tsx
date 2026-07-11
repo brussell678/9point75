@@ -19,9 +19,21 @@ export default function CustomCabinetsNorthCarolinaPage() {
       imageSrc="/home/975-image-3.jpg"
       imageAlt="Custom cabinets handcrafted in North Carolina by 9point75 Woodworks"
       benefits={[
-        "Custom cabinets make better use of every inch, especially in rooms with unusual dimensions or specific storage goals.",
-        "The design process prioritizes layout, durability, and finish so the cabinets feel integrated instead of added on.",
-        "Clients work directly with the builder, which helps decisions stay clear and tailored from first consultation through installation.",
+        {
+          title: "Every inch earns its keep",
+          description:
+            "Custom cabinets make better use of every inch, especially in rooms with unusual dimensions or specific storage goals.",
+        },
+        {
+          title: "Integrated, not added on",
+          description:
+            "The design process prioritizes layout, durability, and finish so the cabinets feel integrated instead of added on.",
+        },
+        {
+          title: "One builder, clear decisions",
+          description:
+            "Clients work directly with the builder, which helps decisions stay clear and tailored from first consultation through installation.",
+        },
       ]}
       processSummary={[
         "Review the space, storage priorities, and visual direction.",

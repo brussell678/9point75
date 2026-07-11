@@ -19,9 +19,21 @@ export default function CustomFurnitureNorthCarolinaPage() {
       imageSrc="/home/975-image-2.jpg"
       imageAlt="Custom furniture handcrafted in North Carolina by 9point75 Woodworks"
       benefits={[
-        "Custom furniture gives you control over dimensions, storage, wood species, and finish so the final piece actually fits your home and routines.",
-        "Instead of settling for disposable furniture, clients get durable joinery, hardwood construction, and a piece designed around how they live.",
-        "Each project is built with a handcrafted process that keeps communication direct and the final result intentional from every angle.",
+        {
+          title: "Made to fit, not made to settle",
+          description:
+            "Custom furniture gives you control over dimensions, storage, wood species, and finish so the final piece actually fits your home and routines.",
+        },
+        {
+          title: "Built to outlast trends",
+          description:
+            "Instead of settling for disposable furniture, clients get durable joinery, hardwood construction, and a piece designed around how they live.",
+        },
+        {
+          title: "Direct line to the maker",
+          description:
+            "Each project is built with a handcrafted process that keeps communication direct and the final result intentional from every angle.",
+        },
       ]}
       processSummary={[
         "Start with a conversation about the room, dimensions, and function.",

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboard } from "@/components/admin-dashboard";
+import { AdminTabs } from "@/components/admin-tabs";
 import { GalleryManager } from "@/components/gallery-manager";
-import { adminFeatures } from "@/content/site-content";
 import { getGalleryAdminItems } from "@/lib/cms";
 import { getMissingEnvVars } from "@/lib/env";
 import type { AdminQuoteRequestRecord, QuoteRequestRecord } from "@/lib/leads";
@@ -13,7 +13,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: "Shop Office",
 };
 
 async function getQuoteRequests() {
@@ -80,15 +80,23 @@ export default async function AdminPage() {
 
   if (missingEnvVars.length > 0) {
     return (
-      <section className="page-hero">
+      <section className="admin-shell">
         <div className="shell admin-route">
           <div className="admin-route__intro">
-            <p className="section-heading__eyebrow">Admin route</p>
-            <h1>Owner dashboard setup required</h1>
-            <p>Add the missing environment variables before enabling sign-in and live lead management.</p>
+            <p className="section-heading__eyebrow">Shop office</p>
+            <h1>The dashboard isn&apos;t connected yet</h1>
+            <p>
+              A few connection settings are missing on the server, so sign-in and quote tracking are
+              turned off for the moment. This is a setup task for whoever manages the website — no
+              action needed from the shop.
+            </p>
           </div>
 
-          <div className="trust-card">
+          <div className="admin-help">
+            <p>
+              <strong>For the site manager:</strong> add these environment variables in Vercel, then
+              redeploy:
+            </p>
             <ul className="check-list">
               {missingEnvVars.map((item) => (
                 <li key={item}>{item}</li>
@@ -113,59 +121,39 @@ export default async function AdminPage() {
     redirect("/sign-in");
   }
 
-  const leads = await getQuoteRequests();
-  const galleryItems = await getGalleryAdminItems();
-  const configured = true;
+  const [leads, galleryItems] = await Promise.all([getQuoteRequests(), getGalleryAdminItems()]);
+  const newLeadCount = leads.filter((lead) => lead.status === "new").length;
 
   return (
-    <section className="page-hero">
-      <div className="shell admin-route">
-        <div className="admin-route__intro">
-          <p className="section-heading__eyebrow">Admin route</p>
-          <h1>Owner dashboard</h1>
-          <p>
-            Signed in with Supabase authentication. Use this space to track leads and keep the gallery current.
-          </p>
-          <div className="button-row">
-            <Link href="/contact" className="button button--secondary">
-              Review Public Form
+    <section className="admin-shell">
+      <div className="shell">
+        <div className="admin-header">
+          <div>
+            <p className="section-heading__eyebrow">Shop office</p>
+            <h1>Welcome back.</h1>
+            <p className="admin-header__sub">
+              {newLeadCount > 0
+                ? `You have ${newLeadCount} new quote ${newLeadCount === 1 ? "request" : "requests"} waiting.`
+                : "No new quote requests right now — the gallery could always use a fresh project photo."}
+            </p>
+          </div>
+          <div className="admin-header__actions">
+            <Link href="/" className="button button--secondary">
+              View Website
             </Link>
             <form action={signOutOwner}>
-              <button type="submit" className="button button--primary">
+              <button type="submit" className="button button--secondary">
                 Sign Out
               </button>
             </form>
           </div>
         </div>
 
-        <div className="trust-card">
-          <p className="section-heading__eyebrow">Current status</p>
-          <p>
-            {configured
-              ? "Supabase environment variables are available."
-              : "Supabase environment variables still need to be added to Vercel and local development."}
-          </p>
-          <ul className="check-list">
-            {adminFeatures.map((feature) => (
-              <li key={feature}>{feature}</li>
-            ))}
-          </ul>
-          {missingEnvVars.length > 0 ? (
-            <ul className="check-list">
-              {missingEnvVars.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="shell admin-route admin-route--stacked">
-        <AdminDashboard leads={leads} attachmentsEnabled={configured} />
-      </div>
-
-      <div className="shell admin-grid admin-grid--single">
-        <GalleryManager items={galleryItems} />
+        <AdminTabs
+          leadCount={newLeadCount}
+          leadsPanel={<AdminDashboard leads={leads} attachmentsEnabled />}
+          galleryPanel={<GalleryManager items={galleryItems} />}
+        />
       </div>
     </section>
   );

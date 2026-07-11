@@ -19,9 +19,21 @@ export default function BuiltInsNorthCarolinaPage() {
       imageSrc="/home/975-image-4.jpg"
       imageAlt="Custom built-ins handcrafted in North Carolina by 9point75 Woodworks"
       benefits={[
-        "Built-ins add storage and structure while making the room feel more intentional and complete.",
-        "Custom sizing means the final result works around real walls, trim, traffic flow, and daily routines.",
-        "Each project is built to match the home and hold up well over time, not just look good in photos.",
+        {
+          title: "Storage with structure",
+          description:
+            "Built-ins add storage and structure while making the room feel more intentional and complete.",
+        },
+        {
+          title: "Fit to the real room",
+          description:
+            "Custom sizing means the final result works around real walls, trim, traffic flow, and daily routines.",
+        },
+        {
+          title: "Built for years, not photos",
+          description:
+            "Each project is built to match the home and hold up well over time, not just look good in photos.",
+        },
       ]}
       processSummary={[
         "Talk through the room, the constraints, and what needs to be stored or displayed.",

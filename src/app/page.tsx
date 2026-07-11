@@ -1,10 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
-import { getHeroContentFromCms } from "@/lib/cms";
+import { getGalleryItemsFromCms, getHeroContentFromCms } from "@/lib/cms";
 import { buildPageMetadata, serviceAreaLabel, servicePageLinks } from "@/lib/seo";
 import {
+  heroBadges,
   materials,
+  nameStory,
   processSteps,
   trustPoints,
   valueProps,
@@ -19,12 +22,28 @@ export const metadata = buildPageMetadata({
 });
 
 export default async function Home() {
-  const heroContent = await getHeroContentFromCms();
+  const [heroContent, galleryItems] = await Promise.all([
+    getHeroContentFromCms(),
+    getGalleryItemsFromCms(),
+  ]);
+
+  const featuredItems = galleryItems
+    .filter((item) => item.image && item.image !== "/placeholders/gallery.svg")
+    .slice(0, 3);
 
   return (
     <>
       <section className="hero">
-        <div className="shell hero__grid">
+        <div className="hero__backdrop">
+          <Image
+            src="/home/975-image-1.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+        </div>
+        <div className="shell hero__inner">
           <div className="hero__content">
             <p className="hero__eyebrow">{heroContent.eyebrow}</p>
             <h1>{heroContent.title}</h1>
@@ -33,33 +52,68 @@ export default async function Home() {
               <Link href={heroContent.primaryCta.href} className="button button--primary">
                 {heroContent.primaryCta.label}
               </Link>
-              <Link href={heroContent.secondaryCta.href} className="button button--secondary">
+              <Link href={heroContent.secondaryCta.href} className="button button--ghost-dark">
                 {heroContent.secondaryCta.label}
               </Link>
             </div>
           </div>
 
-          <div className="hero__side">
-            <div className="feature-image-card feature-image-card--hero">
-              <Image
-                src="/home/975-image-1.jpg"
-                alt="Featured custom woodworking project by 9point75 Woodworks"
-                width={1400}
-                height={1200}
-                className="feature-image"
-                priority
-              />
-            </div>
-
-            <aside className="hero__aside">
-              <p className="hero__aside-label">Service region</p>
-              <p>Jacksonville, North Carolina and surrounding coastal communities.</p>
-              <p className="hero__aside-label">Project focus</p>
-              <p>Built-ins, custom furniture, shadowboxes, plaques, and premium one-off pieces.</p>
-            </aside>
+          <div className="hero__badges">
+            {heroBadges.map((badge) => (
+              <span key={badge} className="hero__badge">
+                {badge}
+              </span>
+            ))}
           </div>
         </div>
       </section>
+
+      <section className="section">
+        <div className="shell story-band">
+          <Image
+            src="/brand/9point75_logo.jpg"
+            alt="9point75 Woodworks saw blade logo"
+            width={500}
+            height={500}
+            className="story-band__logo"
+          />
+          <div>
+            <p className="section-heading__eyebrow">{nameStory.eyebrow}</p>
+            <p className="story-band__figure">{nameStory.figure}</p>
+            <p className="story-band__note">{nameStory.note}</p>
+          </div>
+        </div>
+      </section>
+
+      {featuredItems.length > 0 ? (
+        <section className="section section--contrast">
+          <div className="shell">
+            <SectionHeading
+              eyebrow="Recent work"
+              title="Fresh from the shop."
+              description="A few of the latest pieces to leave the bench. Every one of them started as a conversation."
+            />
+            <div className="featured-strip">
+              {featuredItems.map((item) => (
+                <Link key={item.id} href="/gallery" className="gallery-card">
+                  <div className="gallery-card__image-wrap">
+                    <img src={item.image} alt={item.alt} className="gallery-image" loading="lazy" />
+                  </div>
+                  <div className="gallery-card__body">
+                    <p className="gallery-card__category">{item.category}</p>
+                    <h3>{item.title}</h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="featured-strip__footer">
+              <Link href="/gallery" className="button button--secondary">
+                Browse the Full Gallery
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="section">
         <div className="shell process-section">
@@ -67,7 +121,7 @@ export default async function Home() {
             <SectionHeading
               eyebrow="Why clients hire 9point75"
               title="A custom process that stays personal without feeling informal."
-              description="From Jacksonville, North Carolina to surrounding communities across Northeastern North Carolina, each project is built around practical use, honest communication, and a handcrafted result that lasts."
+              description="From Jacksonville to the surrounding coastal communities, each project is built around practical use, honest communication, and a handcrafted result that lasts."
             />
           </div>
           <div className="feature-image-card feature-image-card--value">
@@ -92,55 +146,18 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section section--contrast">
-        <div className="shell split-layout">
-          <article className="trust-card">
-            <p className="section-heading__eyebrow">Service area</p>
-            <h2>Custom woodworking for Jacksonville, North Carolina and surrounding areas.</h2>
-            <p>{serviceAreaLabel}</p>
-            <p className="contact-note">
-              Clients reach out for custom furniture in North Carolina, custom cabinets in NC, and built-ins in North Carolina that feel tailored to the room instead of forced into it.
-            </p>
-          </article>
-          <article className="trust-card">
-            <p className="section-heading__eyebrow">Explore services</p>
-            <div className="footer-links">
-              {servicePageLinks.map((link) => (
-                <Link key={link.href} href={link.href}>
-                  {link.label} in North Carolina
-                </Link>
-              ))}
-              <Link href="/gallery">View recent project photos</Link>
-              <Link href="/contact">Request a quote</Link>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section className="section section--contrast">
-        <div className="shell process-section">
-          <div>
-            <SectionHeading
-              eyebrow="How it works"
-              title="A straightforward path from first conversation to final delivery."
-            />
-          </div>
-          <div className="feature-image-card feature-image-card--process">
-            <Image
-              src="/home/975-image-3.jpg"
-              alt="Woodworking process detail from 9point75 Woodworks"
-              width={1400}
-              height={1000}
-              className="feature-image"
-            />
-          </div>
-        </div>
+      <section className="section section--dark">
         <div className="shell">
+          <SectionHeading
+            eyebrow="How it works"
+            title="A straightforward path from first conversation to final delivery."
+          />
           <div className="process-grid">
             {processSteps.map((step, index) => (
-              <article key={step} className="process-card">
+              <article key={step.title} className="process-card">
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <h3>{step}</h3>
+                <h3>{step.title}</h3>
+                <p>{step.detail}</p>
               </article>
             ))}
           </div>
@@ -152,7 +169,7 @@ export default async function Home() {
           <div>
             <SectionHeading
               eyebrow="Materials"
-              title="Hardwoods and specialty species selected for durability, warmth, and long-term character."
+              title="Hardwoods selected for durability, warmth, and long-term character."
             />
             <div className="tag-row">
               {materials.map((material) => (
@@ -161,21 +178,25 @@ export default async function Home() {
                 </span>
               ))}
             </div>
+            <p className="contact-note">
+              Clients reach out for custom furniture, custom cabinets, and built-ins that feel
+              tailored to the room instead of forced into it. {serviceAreaLabel}
+            </p>
           </div>
 
           <div className="materials-side">
             <div className="feature-image-card feature-image-card--materials">
-            <Image
-              src="/home/975-image-2.jpg"
-              alt="Custom woodworking materials and craftsmanship detail in North Carolina"
-              width={1400}
-              height={1000}
-              className="feature-image"
+              <Image
+                src="/home/975-image-2.jpg"
+                alt="Custom woodworking materials and craftsmanship detail in North Carolina"
+                width={1400}
+                height={1000}
+                className="feature-image"
               />
             </div>
 
             <div className="trust-card">
-              <p className="section-heading__eyebrow">Trust signals</p>
+              <p className="section-heading__eyebrow">The standard</p>
               <ul className="check-list">
                 {trustPoints.map((point) => (
                   <li key={point}>{point}</li>
@@ -187,12 +208,34 @@ export default async function Home() {
       </section>
 
       <section className="section section--compact">
+        <div className="shell link-grid">
+          {servicePageLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="info-card info-card--linked">
+              <p className="section-heading__eyebrow">Service</p>
+              <h3>{link.label} in North Carolina</h3>
+              <span className="info-card__arrow" aria-hidden="true">
+                Explore →
+              </span>
+            </Link>
+          ))}
+          <Link href="/gallery" className="info-card info-card--linked">
+            <p className="section-heading__eyebrow">Portfolio</p>
+            <h3>Recent project photos</h3>
+            <span className="info-card__arrow" aria-hidden="true">
+              View gallery →
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="section">
         <div className="shell cta-banner">
           <div>
             <p className="section-heading__eyebrow">Ready to talk through a project?</p>
             <h2>Bring the measurements, rough ideas, or inspiration images. We can shape the rest together.</h2>
             <p className="contact-note">
-              Whether you need custom furniture, custom cabinets, or built-ins in North Carolina, the quote process is designed to be clear and low-pressure.
+              The quote process is designed to be clear and low-pressure — whether it&apos;s an heirloom
+              dining table or a retirement shadowbox.
             </p>
           </div>
           <Link href="/contact" className="button button--primary">

@@ -29,32 +29,32 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           <SectionHeading
             eyebrow="Request a quote"
             title="Tell us about the project, the space, and how you want it to feel."
-            description="Email and project description are required. Budget is optional, and inspiration images can be uploaded when the production backend is connected."
+            description="Only an email and a project description are required. Rough ideas, napkin sketches, and inspiration photos are all welcome — that's how most projects start."
           />
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section--compact">
         <div className="shell split-layout split-layout--wide">
           <div className="contact-form-stack">
             {submitted ? (
               <div className="form-success-panel">
                 <h2>Quote request received</h2>
                 <p>
-                  The project details were saved successfully. The owner can now review the request in the admin dashboard.
+                  Thanks — the project details made it to the shop. You&apos;ll hear back directly at the
+                  email you provided.
                 </p>
               </div>
             ) : null}
 
             {missingEnvVars.length > 0 ? (
               <div className="form-warning-panel">
-                <h2>Setup still needed</h2>
-                <p>Add these environment variables before using the production form:</p>
-                <ul className="check-list">
-                  {missingEnvVars.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                <h2>Form temporarily offline</h2>
+                <p>
+                  The quote form isn&apos;t connected right now. Please email{" "}
+                  <a href={`mailto:${contactDetails.email}`}>{contactDetails.email}</a> directly and
+                  we&apos;ll get back to you.
+                </p>
               </div>
             ) : null}
 
@@ -69,10 +69,15 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               <span>{contactDetails.availability}</span>
             </div>
             <p className="contact-note">{serviceAreaLabel}</p>
-            <p className="contact-note">
-              The quote process is designed to start with enough information to guide the first conversation,
-              not force every decision upfront.
+
+            <p className="section-heading__eyebrow" style={{ marginTop: "1.5rem" }}>
+              What happens next
             </p>
+            <ol className="next-steps">
+              <li>Your request lands directly with the maker — not a call center.</li>
+              <li>You get a reply to talk through the piece, the space, and the budget.</li>
+              <li>Design, wood, and finish get refined until the direction is right.</li>
+            </ol>
           </aside>
         </div>
       </section>

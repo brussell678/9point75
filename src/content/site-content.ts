@@ -2,7 +2,7 @@ export const navigationLinks = [
   { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
   { href: "/about", label: "About" },
-  { href: "/admin", label: "Admin Portal" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export const socialLinks = [
@@ -23,44 +23,73 @@ export const contactDetails = {
 };
 
 export const heroContent = {
-  eyebrow: "Custom cabinetry, built-ins, and heirloom furniture",
-  title: "Custom woodwork with a steady hand and a lived-in sense of craftsmanship.",
+  eyebrow: "Custom cabinetry · Built-ins · Heirloom furniture",
+  title: "Woodwork built the way it should be: measured twice, made once, made to last.",
   description:
-    "9point75 Woodworks creates tailored pieces for homes that want warmth, durability, and a finish that feels intentional from every angle.",
+    "9point75 Woodworks is a veteran-owned shop in Jacksonville, North Carolina building fully custom pieces — from statement furniture and built-ins to military shadowboxes that honor a career of service.",
   primaryCta: {
     href: "/contact",
     label: "Request a Quote",
   },
   secondaryCta: {
     href: "/gallery",
-    label: "View Featured Work",
+    label: "See the Work",
   },
+};
+
+export const heroBadges = [
+  "Marine Corps veteran owned",
+  "Est. 11.11.22 — Veterans Day",
+  "Jacksonville, North Carolina",
+];
+
+export const nameStory = {
+  eyebrow: "Why “9point75”?",
+  figure:
+    "One late night at the table saw cost the maker a quarter inch of finger — and gave the shop its name.",
+  note:
+    "The blade in the logo isn't decoration. It's a reminder that this craft demands respect, patience, and total attention to detail. That same discipline — carried over from a career in the Marine Corps — goes into every cut, every joint, and every finish that leaves the shop.",
 };
 
 export const valueProps = [
   {
     title: "Designed around your space",
     description:
-      "Every project starts with how you live, how the room works, and what the final piece needs to do every day.",
+      "Every project starts with how you live, how the room works, and what the piece needs to do every single day.",
   },
   {
-    title: "Direct builder communication",
+    title: "One craftsman, start to finish",
     description:
-      "Clients work with one craftsman from consultation through delivery, with clear updates along the way.",
+      "You work directly with the maker from the first conversation through delivery — no middlemen, no surprises.",
   },
   {
     title: "Built for the long haul",
     description:
-      "Premium hardwoods, durable joinery, and a measured process create pieces made to stay in the family.",
+      "Premium hardwoods, honest joinery, and a measured process create pieces made to stay in the family.",
   },
 ];
 
 export const processSteps = [
-  "Inquiry",
-  "Consultation",
-  "Design Iteration",
-  "Build Process",
-  "Delivery & Walkthrough",
+  {
+    title: "Inquiry",
+    detail: "Send the idea, the measurements, or the inspiration photo. Rough is fine.",
+  },
+  {
+    title: "Consultation",
+    detail: "A direct conversation about the space, the use, and the budget.",
+  },
+  {
+    title: "Design",
+    detail: "Wood species, dimensions, and finish refined until the direction is right.",
+  },
+  {
+    title: "Build",
+    detail: "Unhurried, precise work in the shop — with updates along the way.",
+  },
+  {
+    title: "Delivery",
+    detail: "A final walkthrough to make sure the piece lives well in its new home.",
+  },
 ];
 
 export const materials = [
@@ -74,8 +103,8 @@ export const materials = [
 
 export const trustPoints = [
   "Handcrafted in Jacksonville, North Carolina",
-  "Veteran-owned business",
-  "Fully custom process from start to finish",
+  "Marine Corps veteran owned and operated",
+  "Fully custom process from first sketch to final finish",
 ];
 
 export const galleryCategories = [
@@ -245,10 +274,20 @@ export const aboutSections = {
     "Each project is approached with close communication, practical design thinking, and a respect for materials that earn their character over time.",
 };
 
-export const adminFeatures = [
-  "Secure sign-in for one business owner",
-  "Review and track quote requests by status",
-  "Upload and manage gallery thumbnails",
-  "Edit core site copy without touching code",
-  "Store project files and inspiration images in Supabase Storage",
+export const makerPoints = [
+  {
+    title: "Marine discipline, maker's patience",
+    description:
+      "A career in the Marine Corps teaches you that details are never optional. That standard carries into every board that crosses the bench.",
+  },
+  {
+    title: "A name earned the hard way",
+    description:
+      "The shop is named for the 9.75 fingers the maker kept after a late night at the table saw. It stays in the name as a promise: respect the work, never rush a cut.",
+  },
+  {
+    title: "Rooted in Jacksonville, NC",
+    description:
+      "Home of Camp Lejeune and a community that understands service. Shadowboxes, retirement gifts, and unit plaques get built with the reverence they deserve.",
+  },
 ];

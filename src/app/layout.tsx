@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Public_Sans } from "next/font/google";
+import { Fraunces, Public_Sans } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { businessName, defaultKeywords, getLocalBusinessJsonLd, siteUrl } from "@/lib/seo";
 
-const displayFont = Cormorant_Garamond({
+const displayFont = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  axes: ["opsz", "SOFT", "WONK"],
 });
 
 const bodyFont = Public_Sans({
@@ -77,9 +77,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
         />
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <div className="page-shell">
           <SiteHeader />
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
           <SiteFooter />
         </div>
       </body>

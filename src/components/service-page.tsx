@@ -3,13 +3,18 @@ import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
 import { serviceAreaLabel, servicePageLinks } from "@/lib/seo";
 
+type ServiceBenefit = {
+  title: string;
+  description: string;
+};
+
 type ServicePageProps = {
   eyebrow: string;
   title: string;
   description: string;
   imageSrc: string;
   imageAlt: string;
-  benefits: string[];
+  benefits: ServiceBenefit[];
   processSummary: string[];
   materials: string[];
   ctaCopy: string;
@@ -44,12 +49,12 @@ export function ServicePage({
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section--compact">
         <div className="shell cards-grid">
           {benefits.map((benefit) => (
-            <article key={benefit} className="info-card">
-              <h3>Why custom</h3>
-              <p>{benefit}</p>
+            <article key={benefit.title} className="info-card">
+              <h3>{benefit.title}</h3>
+              <p>{benefit.description}</p>
             </article>
           ))}
         </div>
@@ -82,30 +87,40 @@ export function ServicePage({
       </section>
 
       <section className="section">
-        <div className="shell split-layout">
-          <article className="trust-card">
-            <p className="section-heading__eyebrow">Explore related work</p>
-            <div className="footer-links">
-              <Link href="/gallery">Browse the gallery</Link>
-              {relatedLinks.map((link) => (
-                <Link key={link.href} href={link.href}>
-                  {link.label} in North Carolina
-                </Link>
-              ))}
-            </div>
-          </article>
-          <article className="trust-card">
+        <div className="shell cta-banner">
+          <div>
             <p className="section-heading__eyebrow">Request a quote</p>
-            <p>{ctaCopy}</p>
-            <div className="button-row">
-              <Link href="/contact" className="button button--primary">
-                Request a Quote
-              </Link>
-              <Link href="/gallery" className="button button--secondary">
-                View Gallery
-              </Link>
-            </div>
-          </article>
+            <h2>{ctaCopy}</h2>
+          </div>
+          <div className="button-row">
+            <Link href="/contact" className="button button--primary">
+              Request a Quote
+            </Link>
+            <Link href="/gallery" className="button button--ghost-dark">
+              View Gallery
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--compact">
+        <div className="shell link-grid">
+          <Link href="/gallery" className="info-card info-card--linked">
+            <p className="section-heading__eyebrow">Portfolio</p>
+            <h3>Browse the gallery</h3>
+            <span className="info-card__arrow" aria-hidden="true">
+              View →
+            </span>
+          </Link>
+          {relatedLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="info-card info-card--linked">
+              <p className="section-heading__eyebrow">Related service</p>
+              <h3>{link.label} in North Carolina</h3>
+              <span className="info-card__arrow" aria-hidden="true">
+                Explore →
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
     </>

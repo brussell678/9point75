@@ -40,8 +40,9 @@ export function SiteFooter() {
             <div>
               <p className="footer-eyebrow">9point75 Woodworks</p>
               <p className="footer-copy">
-                Custom cabinetry, furniture, and specialty builds with a calm, client-first process.
+                Custom cabinetry, furniture, and specialty builds — handcrafted with Marine-grade attention to detail.
               </p>
+              <p className="footer-tagline">Veteran owned · Est. 11.11.22</p>
             </div>
           </div>
         </div>
@@ -75,12 +76,6 @@ export function SiteFooter() {
             <a href={`mailto:${contactDetails.email}`}>{contactDetails.email}</a>
             <span>{contactDetails.location}</span>
             <span>{contactDetails.availability}</span>
-          </div>
-        </div>
-
-        <div className="footer-block">
-          <p className="footer-eyebrow">Social</p>
-          <div className="footer-links">
             {socialLinks.map((link) => (
               <a
                 key={link.label}
@@ -95,6 +90,11 @@ export function SiteFooter() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="shell site-footer__base">
+        <span>© {new Date().getFullYear()} 9point75 Woodworks · Jacksonville, North Carolina</span>
+        <Link href="/admin">Owner Sign-In</Link>
       </div>
     </footer>
   );

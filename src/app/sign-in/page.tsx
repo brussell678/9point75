@@ -16,10 +16,11 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   return (
     <section className="page-hero">
       <div className="shell sign-in-card">
-        <p className="section-heading__eyebrow">Owner access</p>
-        <h1>Owner sign in</h1>
+        <p className="section-heading__eyebrow">Shop office</p>
+        <h1>Owner sign-in</h1>
         <p>
-          Use the email and password created in Supabase Auth for the business owner account. Access is limited to the configured admin email.
+          This area is for the shop owner. Sign in with your owner email and password to see quote
+          requests and update the gallery.
         </p>
         <SignInForm next={next} />
       </div>

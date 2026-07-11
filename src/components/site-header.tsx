@@ -2,11 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { navigationLinks } from "@/content/site-content";
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Lock body scroll while the mobile menu sheet is open
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [menuOpen]);
 
   return (
     <header className="site-header">
@@ -24,7 +39,7 @@ export function SiteHeader() {
           </span>
           <span className="brand__text">
             <strong>9point75 Woodworks</strong>
-            <span>Jacksonville, North Carolina</span>
+            <span>Jacksonville, NC</span>
           </span>
         </Link>
 
@@ -35,7 +50,10 @@ export function SiteHeader() {
           aria-controls="mobile-navigation"
           onClick={() => setMenuOpen((value) => !value)}
         >
-          {menuOpen ? "Close" : "Menu"}
+          <span className="site-nav__toggle-bar" aria-hidden="true" />
+          <span className="site-nav__toggle-bar" aria-hidden="true" />
+          <span className="site-nav__toggle-bar" aria-hidden="true" />
+          <span className="site-nav__label">{menuOpen ? "Close menu" : "Open menu"}</span>
         </button>
 
         <nav
@@ -48,6 +66,7 @@ export function SiteHeader() {
               key={link.href}
               href={link.href}
               className="site-nav__link"
+              aria-current={pathname === link.href ? "page" : undefined}
               onClick={() => setMenuOpen(false)}
             >
               {link.label}

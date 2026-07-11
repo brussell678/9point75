@@ -1,7 +1,8 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
-import { materials, trustPoints } from "@/content/site-content";
+import { makerPoints, materials, trustPoints } from "@/content/site-content";
 import { getAboutContentFromCms } from "@/lib/cms";
 import { buildPageMetadata, serviceAreaLabel } from "@/lib/seo";
 
@@ -23,19 +24,30 @@ export default async function AboutPage() {
           <div>
             <SectionHeading
               eyebrow="About the shop"
-              title="Craftsmanship without compromise, built around practical design and close communication."
+              title="Craftsmanship without compromise, built on Marine Corps attention to detail."
               description={aboutSections.intro}
             />
           </div>
           <div className="feature-image-card feature-image-card--about">
             <Image
               src="/home/975-image-6.jpg"
-              alt="About the shop image for 9point75 Woodworks"
+              alt="Inside the 9point75 Woodworks shop"
               width={1400}
               height={1000}
               className="feature-image"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="section section--compact">
+        <div className="shell cards-grid">
+          {makerPoints.map((point) => (
+            <article key={point.title} className="info-card">
+              <h3>{point.title}</h3>
+              <p>{point.description}</p>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -73,7 +85,22 @@ export default async function AboutPage() {
                 </span>
               ))}
             </div>
+            <p className="contact-note">
+              Have a species in mind that isn&apos;t listed? Ask — sourcing something special is part of the job.
+            </p>
           </article>
+        </div>
+      </section>
+
+      <section className="section section--compact">
+        <div className="shell cta-banner">
+          <div>
+            <p className="section-heading__eyebrow">Work with the shop</p>
+            <h2>If it deserves to be built right, it deserves a conversation.</h2>
+          </div>
+          <Link href="/contact" className="button button--primary">
+            Request a Quote
+          </Link>
         </div>
       </section>
     </>
