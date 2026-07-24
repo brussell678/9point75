@@ -1992,6 +1992,14 @@ select {
   }
 
   /* Header: hamburger + slide-down sheet */
+
+  /* backdrop-filter would make .site-header the containing block for the
+     fixed nav sheet below, collapsing it to header height. Opaque instead. */
+  .site-header {
+    backdrop-filter: none;
+    background: var(--paper);
+  }
+
   .site-nav__toggle {
     display: flex;
   }
