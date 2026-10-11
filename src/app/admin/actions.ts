@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isAuthorizedAdmin } from "@/lib/auth";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { GALLERY_BUCKET } from "@/lib/gallery-admin";
 import type { QuoteRequestRecord } from "@/lib/leads";
 
@@ -10,6 +12,19 @@ const QUOTE_ATTACHMENT_BUCKET = "quote-request-files";
 function getTextValue(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+async function isSignedInAdmin() {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) {
+    return false;
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return isAuthorizedAdmin(user?.email);
 }
 
 export async function updateLeadStatus(formData: FormData) {
@@ -159,6 +174,69 @@ export async function moveGalleryItem(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/gallery");
   revalidatePath("/admin");
+}
+
+export async function reorderGalleryImages(
+  projectSlug: string,
+  imageIds: string[],
+): Promise<{ error?: string }> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase || !(await isSignedInAdmin())) {
+    return { error: "Your admin session has expired. Please sign in again." };
+  }
+
+  if (
+    typeof projectSlug !== "string" ||
+    !projectSlug ||
+    !Array.isArray(imageIds) ||
+    !imageIds.every((id) => typeof id === "string")
+  ) {
+    return { error: "The new photo order could not be saved. Please try again." };
+  }
+
+  const { data, error } = await supabase
+    .from("gallery_items")
+    .select("id, image_position")
+    .eq("project_slug", projectSlug)
+    .returns<Array<{ id: string; image_position: number | null }>>();
+
+  if (error || !data) {
+    console.error("Gallery photo order lookup failed", error);
+    return { error: "The new photo order could not be saved. Please try again." };
+  }
+
+  // The new order has to list exactly the photos this project has right now.
+  const currentPositions = new Map(data.map((item) => [item.id, item.image_position]));
+  const isSamePhotoSet =
+    imageIds.length === currentPositions.size &&
+    new Set(imageIds).size === imageIds.length &&
+    imageIds.every((id) => currentPositions.has(id));
+
+  if (!isSamePhotoSet) {
+    return {
+      error: "These photos have changed since the page loaded. Refresh the page and try again.",
+    };
+  }
+
+  const results = await Promise.all(
+    imageIds.flatMap((id, index) =>
+      currentPositions.get(id) === index
+        ? []
+        : [supabase.from("gallery_items").update({ image_position: index }).eq("id", id)],
+    ),
+  );
+
+  const failedUpdate = results.find((result) => result.error);
+  if (failedUpdate) {
+    console.error("Gallery photo order update failed", failedUpdate.error);
+    return { error: "The new photo order could not be saved. Please try again." };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/gallery");
+  revalidatePath("/admin");
+
+  return {};
 }
 
 export async function deleteGalleryItem(formData: FormData) {

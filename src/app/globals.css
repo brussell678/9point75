@@ -1683,7 +1683,8 @@ select {
   font-size: 0.9rem;
 }
 
-.gallery-admin-card__actions .button {
+.gallery-admin-card__actions .button,
+.gallery-photo-order__buttons .button {
   min-height: 2.75rem;
   padding: 0.6rem 1.1rem;
   font-size: 0.93rem;
@@ -1721,12 +1722,60 @@ select {
   font-weight: 600;
 }
 
-.admin-form--compact {
+.admin-form--compact,
+.gallery-photo-order {
   gap: 0.9rem;
   padding: 1.1rem;
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.5);
+}
+
+.gallery-photo-order,
+.gallery-photo-order__list {
+  display: grid;
+}
+
+.gallery-photo-order__hint {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.gallery-photo-order__list {
+  gap: 0.6rem;
+  list-style: none;
+}
+
+.gallery-photo-order__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.gallery-photo-order__number {
+  min-width: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.gallery-photo-order__thumb {
+  width: 112px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.gallery-photo-order__buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 .admin-form > p {
@@ -2139,6 +2188,17 @@ select {
   .lead-card__quick-actions .button,
   .gallery-admin-card__actions .button {
     width: 100%;
+  }
+
+  .gallery-photo-order__buttons {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .gallery-photo-order__buttons .button {
+    flex: 1;
+    padding-inline: 0.5rem;
+    white-space: nowrap;
   }
 
   .status-picker {

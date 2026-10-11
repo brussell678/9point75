@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { deleteGalleryItem, moveGalleryItem, toggleGalleryPublished } from "@/app/admin/actions";
+import {
+  deleteGalleryItem,
+  moveGalleryItem,
+  reorderGalleryImages,
+  toggleGalleryPublished,
+} from "@/app/admin/actions";
 import { ConfirmButton } from "@/components/confirm-button";
 import { galleryCategories } from "@/content/site-content";
 import {
@@ -365,6 +370,94 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
   );
 }
 
+/**
+ * Move Up / Move Down for the photos inside one project — no separate Save step.
+ * The list reorders right away and the new order is saved in the background.
+ */
+function GalleryPhotoOrder({ item }: { item: GalleryAdminItem }) {
+  const [images, setOptimisticImages] = useOptimistic(item.images);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  function movePhoto(index: number, direction: "up" | "down") {
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    const currentImage = images[index];
+    const swapImage = images[swapIndex];
+
+    if (!currentImage || !swapImage) {
+      return;
+    }
+
+    const nextImages = [...images];
+    nextImages[index] = swapImage;
+    nextImages[swapIndex] = currentImage;
+
+    setError("");
+    setSaved(false);
+    startTransition(async () => {
+      setOptimisticImages(nextImages);
+
+      try {
+        const result = await reorderGalleryImages(
+          item.project_slug,
+          nextImages.map((image) => image.id),
+        );
+
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setSaved(true);
+        }
+      } catch {
+        setError("The new photo order could not be saved. Please try again.");
+      }
+    });
+  }
+
+  return (
+    <div className="gallery-photo-order">
+      <p className="gallery-photo-order__hint">
+        Visitors see the photos in this order, starting from the top. Photo 1 is the cover image
+        shown in the gallery. Each move is saved right away.
+      </p>
+
+      <ol className="gallery-photo-order__list">
+        {images.map((image, index) => (
+          <li key={image.id} className="gallery-photo-order__row">
+            <span className="gallery-photo-order__number">{index + 1}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image.url} alt={image.alt} className="gallery-photo-order__thumb" />
+            {index === 0 ? <span className="status-pill status-pill--ready">Cover photo</span> : null}
+            <div className="gallery-photo-order__buttons">
+              <button
+                type="button"
+                className="button button--secondary"
+                disabled={index === 0}
+                onClick={() => movePhoto(index, "up")}
+              >
+                Move Up
+              </button>
+              <button
+                type="button"
+                className="button button--secondary"
+                disabled={index === images.length - 1}
+                onClick={() => movePhoto(index, "down")}
+              >
+                Move Down
+              </button>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {error ? <p className="form-error">{error}</p> : null}
+      {pending ? <p className="gallery-photo-order__hint">Saving the new order...</p> : null}
+      {saved && !pending ? <p className="form-success">Photo order saved.</p> : null}
+    </div>
+  );
+}
+
 export function GalleryManager({ items }: GalleryManagerProps) {
   return (
     <section className="admin-stack">
@@ -384,7 +477,8 @@ export function GalleryManager({ items }: GalleryManagerProps) {
           <h2>Manage existing projects</h2>
           <p>
             Move Up / Move Down changes the order visitors see. Hide keeps a project without showing
-            it on the website.
+            it on the website. To rearrange the photos inside a project, open &quot;Change photo
+            order&quot;.
           </p>
         </div>
 
@@ -453,6 +547,12 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                     <summary>Edit project</summary>
                     <GalleryEditForm item={item} />
                   </details>
+                  {item.image_count > 1 ? (
+                    <details className="gallery-admin-card__editor">
+                      <summary>Change photo order</summary>
+                      <GalleryPhotoOrder item={item} />
+                    </details>
+                  ) : null}
                 </div>
               </article>
             ))}
