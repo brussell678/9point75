@@ -3,6 +3,7 @@
 import { useOptimistic, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
+  deleteGalleryImage,
   deleteGalleryItem,
   moveGalleryItem,
   reorderGalleryImages,
@@ -371,14 +372,14 @@ function GalleryEditForm({ item }: { item: GalleryAdminItem }) {
 }
 
 /**
- * Move Up / Move Down for the photos inside one project — no separate Save step.
- * The list reorders right away and the new order is saved in the background.
+ * Move Up / Move Down / Delete for the photos inside one project — no separate Save step.
+ * The list changes right away and the change is saved in the background.
  */
 function GalleryPhotoOrder({ item }: { item: GalleryAdminItem }) {
   const [images, setOptimisticImages] = useOptimistic(item.images);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [success, setSuccess] = useState("");
 
   function movePhoto(index: number, direction: "up" | "down") {
     const swapIndex = direction === "up" ? index - 1 : index + 1;
@@ -394,7 +395,7 @@ function GalleryPhotoOrder({ item }: { item: GalleryAdminItem }) {
     nextImages[swapIndex] = currentImage;
 
     setError("");
-    setSaved(false);
+    setSuccess("");
     startTransition(async () => {
       setOptimisticImages(nextImages);
 
@@ -407,10 +408,39 @@ function GalleryPhotoOrder({ item }: { item: GalleryAdminItem }) {
         if (result.error) {
           setError(result.error);
         } else {
-          setSaved(true);
+          setSuccess("Photo order saved.");
         }
       } catch {
         setError("The new photo order could not be saved. Please try again.");
+      }
+    });
+  }
+
+  function deletePhoto(index: number) {
+    const image = images[index];
+
+    if (
+      !image ||
+      !window.confirm(`Delete photo ${index + 1} from "${item.title}"? This can't be undone.`)
+    ) {
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+    startTransition(async () => {
+      setOptimisticImages(images.filter((current) => current.id !== image.id));
+
+      try {
+        const result = await deleteGalleryImage(item.project_slug, image.id);
+
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setSuccess("Photo deleted.");
+        }
+      } catch {
+        setError("The photo could not be deleted. Please try again.");
       }
     });
   }
@@ -419,7 +449,7 @@ function GalleryPhotoOrder({ item }: { item: GalleryAdminItem }) {
     <div className="gallery-photo-order">
       <p className="gallery-photo-order__hint">
         Visitors see the photos in this order, starting from the top. Photo 1 is the cover image
-        shown in the gallery. Each move is saved right away.
+        shown in the gallery. Each change is saved right away.
       </p>
 
       <ol className="gallery-photo-order__list">
@@ -446,14 +476,22 @@ function GalleryPhotoOrder({ item }: { item: GalleryAdminItem }) {
               >
                 Move Down
               </button>
+              <button
+                type="button"
+                className="button button--danger"
+                disabled={images.length === 1}
+                onClick={() => deletePhoto(index)}
+              >
+                Delete Photo
+              </button>
             </div>
           </li>
         ))}
       </ol>
 
       {error ? <p className="form-error">{error}</p> : null}
-      {pending ? <p className="gallery-photo-order__hint">Saving the new order...</p> : null}
-      {saved && !pending ? <p className="form-success">Photo order saved.</p> : null}
+      {pending ? <p className="gallery-photo-order__hint">Saving your changes...</p> : null}
+      {success && !pending ? <p className="form-success">{success}</p> : null}
     </div>
   );
 }
@@ -477,8 +515,8 @@ export function GalleryManager({ items }: GalleryManagerProps) {
           <h2>Manage existing projects</h2>
           <p>
             Move Up / Move Down changes the order visitors see. Hide keeps a project without showing
-            it on the website. To rearrange the photos inside a project, open &quot;Change photo
-            order&quot;.
+            it on the website. To rearrange or delete the photos inside a project, open
+            &quot;Arrange or delete photos&quot;.
           </p>
         </div>
 
@@ -549,7 +587,7 @@ export function GalleryManager({ items }: GalleryManagerProps) {
                   </details>
                   {item.image_count > 1 ? (
                     <details className="gallery-admin-card__editor">
-                      <summary>Change photo order</summary>
+                      <summary>Arrange or delete photos</summary>
                       <GalleryPhotoOrder item={item} />
                     </details>
                   ) : null}

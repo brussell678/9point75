@@ -239,6 +239,68 @@ export async function reorderGalleryImages(
   return {};
 }
 
+export async function deleteGalleryImage(
+  projectSlug: string,
+  imageId: string,
+): Promise<{ error?: string }> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase || !(await isSignedInAdmin())) {
+    return { error: "Your admin session has expired. Please sign in again." };
+  }
+
+  if (typeof projectSlug !== "string" || !projectSlug || typeof imageId !== "string" || !imageId) {
+    return { error: "The photo could not be deleted. Please try again." };
+  }
+
+  const { data, error } = await supabase
+    .from("gallery_items")
+    .select("id, image_path")
+    .eq("project_slug", projectSlug)
+    .returns<Array<{ id: string; image_path: string | null }>>();
+
+  if (error || !data) {
+    console.error("Gallery photo lookup failed", error);
+    return { error: "The photo could not be deleted. Please try again." };
+  }
+
+  const image = data.find((item) => item.id === imageId);
+  if (!image) {
+    return {
+      error: "These photos have changed since the page loaded. Refresh the page and try again.",
+    };
+  }
+
+  // A project is made of its photos, so the last one only goes with the whole project.
+  if (data.length === 1) {
+    return {
+      error: "A project needs at least one photo. To remove everything, use Delete Project.",
+    };
+  }
+
+  const { error: deleteError } = await supabase.from("gallery_items").delete().eq("id", imageId);
+  if (deleteError) {
+    console.error("Gallery photo delete failed", deleteError);
+    return { error: "The photo could not be deleted. Please try again." };
+  }
+
+  // The record goes first: if this step fails we keep an unused file, not a broken photo on the site.
+  if (image.image_path) {
+    const { error: storageError } = await supabase.storage
+      .from(GALLERY_BUCKET)
+      .remove([image.image_path]);
+
+    if (storageError) {
+      console.error("Gallery photo file cleanup failed", storageError);
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/gallery");
+  revalidatePath("/admin");
+
+  return {};
+}
+
 export async function deleteGalleryItem(formData: FormData) {
   const supabase = getSupabaseAdminClient();
   if (!supabase) {

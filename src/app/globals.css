@@ -1774,6 +1774,8 @@ select {
 
 .gallery-photo-order__buttons {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.5rem;
   margin-left: auto;
 }
@@ -2199,6 +2201,10 @@ select {
     flex: 1;
     padding-inline: 0.5rem;
     white-space: nowrap;
+  }
+
+  .gallery-photo-order__buttons .button--danger {
+    flex-basis: 100%;
   }
 
   .status-picker {
