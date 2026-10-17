@@ -102,10 +102,14 @@ export async function submitQuoteRequest(
       await sendQuoteRequestNotification({
         name: payload.name,
         email: payload.email,
+        phone: payload.phone,
+        location: payload.location,
         projectType: payload.project_type,
         budgetRange: payload.budget_range,
         timeline: payload.timeline,
+        measurements: payload.measurements,
         description: payload.description,
+        attachmentPaths: payload.attachment_paths,
       });
     } catch (notificationError) {
       console.error("Quote request notification failed", notificationError);

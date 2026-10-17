@@ -4,8 +4,8 @@ export const siteUrl = "https://www.9point75woodworks.com";
 export const businessName = "9point75 Woodworks";
 export const city = "Jacksonville";
 export const state = "North Carolina";
-export const region = "Northeastern North Carolina";
-export const serviceAreaLabel = "Serving Jacksonville, North Carolina, Northeastern North Carolina, and surrounding areas.";
+export const region = "Eastern North Carolina";
+export const serviceAreaLabel = "Serving Jacksonville, North Carolina, Eastern North Carolina, and surrounding areas.";
 
 export const defaultKeywords = [
   "custom furniture North Carolina",

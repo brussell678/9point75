@@ -17,7 +17,8 @@ Next.js marketing site and owner admin foundation for 9point75 Woodworks.
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_EMAIL`
-   - Optional email notifications: `RESEND_API_KEY`, `NOTIFICATION_FROM_EMAIL`, `NOTIFICATION_TO_EMAIL`
+   - Quote request email notifications: `RESEND_API_KEY`, `NOTIFICATION_FROM_EMAIL`
+   - Optional notification override: `NOTIFICATION_TO_EMAIL` (defaults to `9point75woodworks@gmail.com`)
 4. Start development:
    - `npm run dev`
 
@@ -27,7 +28,7 @@ Next.js marketing site and owner admin foundation for 9point75 Woodworks.
 - Set `ADMIN_EMAIL` to that exact email address.
 - Run the SQL in `supabase/schema.sql`.
 - Add the same environment variables in Vercel before enabling production submissions.
-- If you want new lead emails, set up a Resend sender and add the optional notification env vars.
+- To send new lead emails, set up a Resend sender and add `RESEND_API_KEY` plus `NOTIFICATION_FROM_EMAIL`.
 
 ## Current Routes
 - `/`
