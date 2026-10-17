@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const siteUrl = "https://9point75woodworks.com";
+export const siteUrl = "https://www.9point75woodworks.com";
 export const businessName = "9point75 Woodworks";
 export const city = "Jacksonville";
 export const state = "North Carolina";

@@ -2277,3 +2277,25 @@ select {
     width: 100%;
   }
 }
+
+.site-footer__base-links {
+  display: inline-flex;
+  gap: 1.25rem;
+}
+
+.legal-copy {
+  max-width: 70ch;
+}
+
+.legal-copy h2 {
+  margin: 2.25rem 0 0.6rem;
+  font-family: var(--font-display), serif;
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.legal-copy p {
+  margin: 0 0 0.9rem;
+  line-height: 1.7;
+  color: var(--text);
+}

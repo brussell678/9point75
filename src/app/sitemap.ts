@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/custom-furniture-north-carolina",
     "/custom-cabinets-north-carolina",
     "/built-ins-north-carolina",
+    "/privacy",
   ];
 
   return routes.map((route) => ({

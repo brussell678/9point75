@@ -94,7 +94,11 @@ export function SiteFooter() {
 
       <div className="shell site-footer__base">
         <span>© {new Date().getFullYear()} 9point75 Woodworks · Jacksonville, North Carolina</span>
-        <Link href="/admin">Owner Sign-In</Link>
+        <span className="site-footer__base-links">
+          <Link href="/privacy">Privacy</Link>
+          {/* Full page load, so the analytics guard is in place before the owner pages render. */}
+          <a href="/admin">Owner Sign-In</a>
+        </span>
       </div>
     </footer>
   );

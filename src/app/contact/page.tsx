@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LeadEvent } from "@/components/lead-event";
 import { PageHero } from "@/components/page-hero";
 import { QuoteForm } from "@/components/quote-form";
 import { contactDetails } from "@/content/site-content";
@@ -35,6 +36,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           <div className="contact-form-stack">
             {submitted ? (
               <div className="form-success-panel">
+                <LeadEvent />
                 <h2>Quote request received</h2>
                 <p>
                   Thanks — the project details made it to the shop. You&apos;ll hear back directly at the

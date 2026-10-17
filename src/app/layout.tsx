@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Fraunces, Public_Sans } from "next/font/google";
 import "./globals.css";
+import { AnalyticsGuard } from "@/components/analytics-guard";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { GA_MEASUREMENT_ID, gaInitScript } from "@/lib/analytics";
 import { businessName, defaultKeywords, getLocalBusinessJsonLd, siteUrl } from "@/lib/seo";
 
 const displayFont = Fraunces({
@@ -72,11 +74,16 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: gaInitScript }} />
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
+      </head>
       <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
         />
+        <AnalyticsGuard />
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
